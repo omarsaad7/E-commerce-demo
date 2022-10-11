@@ -19,13 +19,21 @@
         "userTypeCannotBeChanged": "USER TYPE CAN NOT BE CHANGED",
         "noTransactionFound":"NO TRANSACTION FOUND",
         "noItemFound":"NO ITEM FOUND",
+        "noOrderFound":"NO ORDER FOUND",
         "expiryDateValidation":"The expiry date is before today's date. Please select a valid expiry date",
-        "itemNotInCart":"Item is not in your cart"
+        "itemNotInCart":"Item is not in your cart",
+        "emptyCart":"Cart is empty",
+        "itemNotAvailable":" Item not Available"
     },
     "types":{
         "user":{
             "customer":"CUSTOMER",
             "admin":"ADMIN"
+        },
+        "orderStatus":{
+            "pending":"PENDING",
+            "paid":"PAID",
+            "paymentFailed":"PAYMENTFAILED"
         }
     },
     "headers":{

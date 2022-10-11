@@ -43,7 +43,12 @@ const transactionSchema = new Schema(
     userId:
     {
       type: Schema.Types.ObjectId,
-      ref: 'user'
+      ref: 'User'
+    },
+    orderId:
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Order'
     }
 
   },

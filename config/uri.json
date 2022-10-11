@@ -21,6 +21,16 @@
             "getAllItems":"/"
         }
     },
+    "order":{
+        "baseUri":"/api/orders",
+        "api":{
+            "createOrder":"/create",
+            "getOrderById":"/:id",
+            "getUserOrders":"/all/customer",
+            "deleteOrder":"/delete/:id",
+            "getAllOrders":"/all/admin"
+        }
+    },
     "transaction":{
         "baseUri":"/api/transactions",
         "api":{

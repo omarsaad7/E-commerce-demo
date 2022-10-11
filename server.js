@@ -35,6 +35,7 @@ app.get("/", (req, res) => res.send({msg:constants.welcomeMsg}));
 app.use(uri.user.baseUri, require("./api/routes/user.router"));
 app.use(uri.transaction.baseUri, require("./api/routes/transaction.router"));
 app.use(uri.item.baseUri, require("./api/routes/item.router"));
+app.use(uri.order.baseUri, require("./api/routes/order.router"));
 app.use(uri.auth.baseUri, require("./api/routes/auth.router"));
 // Wrong path
 app.use((req, res) =>

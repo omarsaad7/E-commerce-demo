@@ -1,45 +1,31 @@
 const User = require("../../models/user.model");
 const Transaction = require("../../models/transaction.model");
-const { chargeValidation} = require('../../validations/transaction.validation')
+const Item = require("../../models/item.model");
+const Order = require("../../models/order.model");
 const constants = require('../../config/constants.json')
 const uri = require('../../config/uri.json')
 const {getUserId} = require('./auth.controller.js')
 const axios = require('axios')
 const {paymentBackendRequest} = require('../../utils/dto.utils.js')
+
 //Charge user
-const chargeUser = async (req, res) => {
+const chargeUser = async (payment,itemsList,orderId) => {
 
-  //check if any attribute in the request body violates the attributes constraints
   try{
-    chargeValidation(req.body)
+      var backendResponse = await chargeUserBackendCall(payment)
+      console.log(backendResponse)
+      ////////// add logic here //////////////
   }
-  catch(error) {
-        return res.status(400).json({
-          error: error.message
-        });
-      }
-
-      chargeUserBackendCall(req.body,res)
-      
-
-  //create new Transaction and return the Transaction details
-  // await Transaction.create(req.body)
-  //   .then(createdTarget => {
-  //     res.json({
-  //       msg: constants.errorMessages.success,
-  //       data: createdTarget
-  //     });
-  //   },
-  //   )
-  //   .catch(error => {
-  //     res.status(422).json({
-  //       error: error.message
-  //     });
-  //   });
+  catch(error){
+    for (let i = 0; i < itemsList.length; i++) {
+      await Item.updateOne({ '_id': itemsList[i].item._id }, {quantity: itemsList[i].item.quantity + itemsList[i].count})
+    }
+    await Order.updateOne({ '_id': orderId },{status:constants.types.orderStatus.paymentFailed,failureReason:error.message})
+  }
 
 };
 
-const chargeUserBackendCall = async (body,res) => {
+const chargeUserBackendCall = async (body) => {
   const url = uri.transaction.backend.host + uri.transaction.backend.api.charge
   var data = paymentBackendRequest(body)
 
@@ -52,18 +38,10 @@ const chargeUserBackendCall = async (body,res) => {
      },
      data : data
    };
-   axios(config)
+   return axios(config)
    .then( (response) =>  {
-    res.json({
-      msg: constants.errorMessages.success,
-      data: response.data
-    });
+    return response.data
    })
-   .catch( (error) =>{
-    res.status(422).json({
-            error: error.message
-          });
-   });
 }
 
 

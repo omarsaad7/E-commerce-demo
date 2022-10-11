@@ -3,10 +3,12 @@ const constants = require('../../config/constants.json')
 
 module.exports = function (req, res, next) {
 
-    const token = req.headers.authorization.replace('Bearer ','')
+    
+    var token = req.headers.authorization
     if (!token)
         return res.status(401).send({error:constants.errorMessages.unauthorized})
     try {
+        token = token.replace('Bearer ','')
         const verified = jwt.verify(token, process.env.TOKEN)
         req.user = verified
         next()
