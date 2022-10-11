@@ -1,7 +1,8 @@
 const User = require("../../models/user.model");
+const Item = require("../../models/item.model");
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
-const { createUserValidation,updateUserValidation } = require('../../validations/user.validation')
+const { createUserValidation,updateUserValidation,addItemValidation,removeItemValidation} = require('../../validations/user.validation')
 const constants = require('../../config/constants.json')
 const {getUserId} = require('./auth.controller.js')
 
@@ -135,13 +136,101 @@ const deleteUser = async (req, res) => {
   }
 }
 
+//add Item to cart
+const addItem =  (req, res) => {
+  try {
+    // Validate Request Body
+    const { error } = addItemValidation(req.body)
+    if (error) return res.status(400).json({error:error.details[0].message})
+    // Get User 
+    const userId = getUserId(req.headers.authorization)
+    User.findById(userId)
+      .then(user => {
+        // return If no user is found
+        if(!user)
+          return res.status(404).json({
+            error: constants.errorMessages.noUserFound
+          });
+
+          // Get Item
+          Item.findById(req.body.itemId)
+          .then(async (item) => {
+            if(!item)
+            return res.status(404).json({
+              error: constants.errorMessages.noItemFound
+            });
+            for (let i = 0; i <  user.cart.length; i++) {
+              if(user.cart[i].item._id.toString()===item._id.toString()){
+                user.cart[i].count = user.cart[i].count + req.body.count
+                await User.updateOne({ '_id': userId }, {cart:user.cart})
+                return res.json({ msg: constants.errorMessages.success});
+              }
+            }
+            user.cart.push({item:item,count:req.body.count})
+            await User.updateOne({ '_id': userId }, {cart:user.cart})
+            res.json({ msg: constants.errorMessages.success});
+          })
+           
+      })
+  }
+  catch (error) { res.status(422).json({
+    error: error.message
+  }); }
+};
+
+
+
+//add Item to cart
+const removeItem =  (req, res) => {
+  try {
+    // Validate Request Body
+    const { error } = removeItemValidation(req.body)
+    if (error) return res.status(400).json({error:error.details[0].message})
+    // Get User 
+    const userId = getUserId(req.headers.authorization)
+    User.findById(userId)
+      .then(user => {
+        // return If no user is found
+        if(!user)
+          return res.status(404).json({
+            error: constants.errorMessages.noUserFound
+          });
+
+          // Get Item
+          Item.findById(req.body.itemId)
+          .then(async (item) => {
+            if(!item)
+            return res.status(404).json({
+              error: constants.errorMessages.noItemFound
+            });
+            for (let i = 0; i <  user.cart.length; i++) {
+              if(user.cart[i].item._id.toString()===item._id.toString()){
+               
+                user.cart.splice(i, 1)
+                await User.updateOne({ '_id': userId }, {cart:user.cart})
+                return res.json({ msg: constants.errorMessages.success});
+              }
+            }
+            res.status(422).json({
+              error: constants.errorMessages.itemNotInCart
+            })
+          })
+           
+      })
+  }
+  catch (error) { res.status(422).json({
+    error: error.message
+  }); }
+};
 
 module.exports = {
   createCustomer,
   getUserById,
   updateUser,
   deleteUser,
-  getAllCustomers
+  getAllCustomers,
+  addItem,
+  removeItem
 };
 
 

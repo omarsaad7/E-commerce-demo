@@ -77,15 +77,15 @@ const getAllItems =  (req, res) => {
         .then((items) => {
           //Count All Items
           Item.countDocuments().then((count)=>{
-            console.log(count)
+            res.json({
+              msg:constants.errorMessages.success,
+              totalSize: count,
+              page:page,
+              limit:limit,
+              data: items,
+            })
           })
-          res.json({
-            msg:constants.errorMessages.success,
-            totalSize: "CHANGEEEEEEE",
-            page:page,
-            limit:limit,
-            data: items,
-          })
+          
         })
         .catch((error) => {
           res.status(400).json({

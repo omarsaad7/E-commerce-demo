@@ -6,7 +6,9 @@
             "getUserById":"/:id",
             "updateUser":"/update/:id",
             "deleteUser":"/delete/:id",
-            "getAllCustomers":"/customers/admin"
+            "getAllCustomers":"/customers/admin",
+            "addItem":"/items/add",
+            "removeItem":"/items/remove"
         }
     },
     "item":{

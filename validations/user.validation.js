@@ -18,6 +18,22 @@ module.exports = {
             })
 
             return userSchema.validate(User)
+    },
+
+    addItemValidation : item => {
+        const itemIdSchema = Joi.object({
+            itemId:Joi.string().required(),
+            count:Joi.number().min(1).required(),
+            })
+
+            return itemIdSchema.validate(item)
+    },
+    removeItemValidation : item => {
+        const itemIdSchema = Joi.object({
+            itemId:Joi.string().required(),
+            })
+
+            return itemIdSchema.validate(item)
     }
 }
    

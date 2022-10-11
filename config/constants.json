@@ -19,7 +19,8 @@
         "userTypeCannotBeChanged": "USER TYPE CAN NOT BE CHANGED",
         "noTransactionFound":"NO TRANSACTION FOUND",
         "noItemFound":"NO ITEM FOUND",
-        "expiryDateValidation":"The expiry date is before today's date. Please select a valid expiry date"
+        "expiryDateValidation":"The expiry date is before today's date. Please select a valid expiry date",
+        "itemNotInCart":"Item is not in your cart"
     },
     "types":{
         "user":{
