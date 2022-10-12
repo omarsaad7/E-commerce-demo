@@ -10,7 +10,18 @@ function paymentBackendRequest(body) {
    'card[cvc]': body.cvc 
    });
   }
+
+
+  function createTransactionDto(backendResponse,orderId,userId) {
+    var transactionObject = backendResponse
+    transactionObject._id=backendResponse.id
+    transactionObject.orderId=orderId
+    transactionObject.userId=userId
+    transactionObject.source._id = backendResponse.source.id
+    transactionObject.date = backendResponse.created
+    return transactionObject
+    }
   
   
   
-module.exports = { paymentBackendRequest}
+module.exports = { paymentBackendRequest,createTransactionDto}

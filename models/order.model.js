@@ -36,10 +36,10 @@ const orderSchema = new Schema(
   failureReason: String,
   transactionId:
     {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Transaction'
     },
-    receiptId:String
+    receiptUrl:String
   },
   {
     timestamps: true

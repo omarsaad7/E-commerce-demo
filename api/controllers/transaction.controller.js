@@ -6,19 +6,21 @@ const constants = require('../../config/constants.json')
 const uri = require('../../config/uri.json')
 const {getUserId} = require('./auth.controller.js')
 const axios = require('axios')
-const {paymentBackendRequest} = require('../../utils/dto.utils.js')
+const {paymentBackendRequest,createTransactionDto} = require('../../utils/dto.utils.js')
 
 //Charge user
-const chargeUser = async (payment,itemsList,orderId) => {
+const chargeUser = async (payment,itemsList,orderId,userId) => {
 
   try{
       var backendResponse = await chargeUserBackendCall(payment)
-      console.log(backendResponse)
-      ////////// add logic here //////////////
+      var transactionObject = createTransactionDto(backendResponse,orderId,userId)
+      const transaction = await Transaction.create(transactionObject)
+      await Order.updateOne({ '_id': orderId },{transactionId:transaction._id,status:constants.types.orderStatus.paid,receiptUrl: transaction.receipt_url})
   }
   catch(error){
     for (let i = 0; i < itemsList.length; i++) {
-      await Item.updateOne({ '_id': itemsList[i].item._id }, {quantity: itemsList[i].item.quantity + itemsList[i].count})
+      var item = await Item.findById(itemsList[i].item._id)
+      await Item.updateOne({ '_id': itemsList[i].item._id }, {quantity: item.quantity + itemsList[i].count})
     }
     await Order.updateOne({ '_id': orderId },{status:constants.types.orderStatus.paymentFailed,failureReason:error.message})
   }
@@ -49,7 +51,7 @@ const chargeUserBackendCall = async (body) => {
 //get Transaction by id
 const getTransactionById = (req, res) => {
   //search for the Transaction with the requested id
-  User.find({id:req.params.id})
+  Transaction.findById(req.params.id)
   .then(foundTarget => {
     // Throw Error if no transaction is found
     if(!foundTarget)

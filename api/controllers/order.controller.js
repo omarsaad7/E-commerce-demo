@@ -33,22 +33,9 @@ const createOrder = async (req, res) => {
           if(user.cart.length === 0)
             return res.status(422).json({error: constants.errorMessages.emptyCart});
           
-          // check for items availablity
-          var totalPrice = 0
-          var itemsList = []
-          for (let i = 0; i < user.cart.length; i++) {
-            var item = await Item.findById(user.cart[i].item._id)
-            if(item.quantity < user.cart[i].count){
-              return res.status(422).json({error: item.name + constants.errorMessages.itemNotAvailable});
-            }
-            itemsList.push({item:item,count: user.cart[i].count})
-          }
-
-          // update items quantity and calculate total price
-          for (let i = 0; i < itemsList.length; i++) {
-            await Item.updateOne({ '_id': itemsList[i].item._id }, {quantity: itemsList[i].item.quantity - itemsList[i].count})
-            totalPrice = totalPrice + (itemsList[i].item.price * itemsList[i].count)
-          }
+          // check for items availablity, update Them and calculate total price
+          var {totalPrice, itemsList,errorMsg} =  await getTotalPriceAndUpdateItems(user)
+          if(errorMsg)  return res.status(422).json({error: errorMsg});
 
           const createOrderData = {userId:userId, totalPrice:totalPrice,payment:req.body.payment}
           // check if any attribute in the request body violates the attributes constraints
@@ -58,8 +45,7 @@ const createOrder = async (req, res) => {
           const order = await Order.create(createOrderData)
           res.json({msg:constants.errorMessages.success,data:order})
 
-          chargeUser(req.body.payment,itemsList,order._id)
-      
+          chargeUser(req.body.payment,itemsList,order._id,userId)
 
       })
   }
@@ -69,6 +55,25 @@ const createOrder = async (req, res) => {
   }); }
 };
 
+const getTotalPriceAndUpdateItems = async (user) => {
+  // check for items availablity
+  var totalPrice = 0
+  var itemsList = []
+  for (let i = 0; i < user.cart.length; i++) {
+    var item = await Item.findById(user.cart[i].item._id)
+    if(item.quantity < user.cart[i].count){
+      return {errorMsg:item.name + constants.errorMessages.itemNotAvailable}
+    }
+    itemsList.push({item:item,count: user.cart[i].count})
+  }
+
+  // update items quantity and calculate total price
+  for (let i = 0; i < itemsList.length; i++) {
+    await Item.updateOne({ '_id': itemsList[i].item._id }, {quantity: itemsList[i].item.quantity - itemsList[i].count})
+    totalPrice = totalPrice + (itemsList[i].item.price * itemsList[i].count)
+  }
+  return {totalPrice:totalPrice, itemsList:itemsList}
+}
 
 //get item by id (No Auth required)
 const getOrderById = (req, res) => {
@@ -119,43 +124,6 @@ const getAllItems =  (req, res) => {
           })
         })
     
-}
-
-//Update Item (Only Admin)
-const updateItem = async (req, res) => {
-  try {
-     // Get User and make sure that user type is admin
-     const userId = getUserId(req.headers.authorization)
-     User.findById(userId)
-       .then(async (user) => {
-         // return If no user is found
-         if(!user)
-           return res.status(422).json({
-             error: constants.errorMessages.noUserFound
-           });
-           //Forbidden if user type is not an admin
-           if(user.type !== constants.types.user.admin)
-             return res.status(403).json({
-               error: constants.errorMessages.forbidden
-             });
- 
-           //check if any attribute in the request body violates the attributes constraints
-           const { error } = updateItemValidation(req.body)
-           if (error) return res.status(400).json({error:error.details[0].message})
- 
-           const targetId = req.params.id;
-           const item = await Item.findById(targetId)
-           if (!item) return res.status(404).send({ error: constants.errorMessages.noItemFound })
-           await Item.updateOne({ '_id': targetId }, req.body)
-           res.json({ msg: constants.errorMessages.success});
-           
-       })
-  }
-  catch (error) {
-    res.status(422).json({
-      err: error.message
-    });
-  }
 }
 
 // Delete Item (Only Admin)

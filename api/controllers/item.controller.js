@@ -49,9 +49,9 @@ const getItemById = (req, res) => {
   //search for the Item with the requested id
   Item.findById(req.params.id)
   .then(foundTarget => {
-    // Throw Error if no user is found
+    // Throw Error if no item is found
     if(!foundTarget)
-      throw new Error(constants.errorMessages.noUserFound);
+      throw new Error(constants.errorMessages.noItemFound);
     res.json({
       msg: constants.errorMessages.success,
       data: foundTarget
