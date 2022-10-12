@@ -7,25 +7,49 @@ const uri = require('../../config/uri.json')
 const {getUserId} = require('./auth.controller.js')
 const axios = require('axios')
 const {paymentBackendRequest,createTransactionDto} = require('../../utils/dto.utils.js')
+const { chargeValidation } = require('../../validations/transaction.validation')
 
 //Charge user
-const chargeUser = async (payment,itemsList,orderId,userId) => {
+const chargeUser = async (req, res) => {
+  
+    try{
+      chargeValidation(req.body)
+    }
+    catch(error) {
+          return res.status(400).json({
+            error: error.message
+          });
+        }
 
-  try{
-      var backendResponse = await chargeUserBackendCall(payment)
-      var transactionObject = createTransactionDto(backendResponse,orderId,userId)
+    const userId = getUserId(req.headers.authorization)
+    const user = await User.findById(userId)
+    if(!user) 
+      return res.status(422).json({error: constants.errorMessages.noUserFound});
+    const order = await Order.findById(req.body.orderId)
+    if(!order) 
+      return res.status(422).json({error: constants.errorMessages.noOrderFound});
+    if(order.status !== constants.types.orderStatus.paymentProcessing)
+      return res.status(422).send({ error: constants.errorMessages.chargeForProcessingPaymentOrdersOnly }) 
+
+    // Accept request and Return 202
+    res.status(202).json({msg: constants.errorMessages.paymentRequestAccepted,data:order});
+
+    try{
+
+      var backendResponse = await chargeUserBackendCall(req.body.payment)
+      var transactionObject = createTransactionDto(backendResponse,req.body.orderId,userId)
       const transaction = await Transaction.create(transactionObject)
-      await Order.updateOne({ '_id': orderId },{transactionId:transaction._id,status:constants.types.orderStatus.paid,receiptUrl: transaction.receipt_url})
+      await Order.updateOne({ '_id': req.body.orderId },{transactionId:transaction._id,status:constants.types.orderStatus.paid,receiptUrl: transaction.receipt_url})
   }
   catch(error){
     var msg = error.message
     if(error.response && error.response.data && error.response.data.error && error.response.data.error.message)
       msg = error.response.data.error.message
-    for (let i = 0; i < itemsList.length; i++) {
-      var item = await Item.findById(itemsList[i].item._id)
-      await Item.updateOne({ '_id': itemsList[i].item._id }, {quantity: item.quantity + itemsList[i].count})
+    for (let i = 0; i < order.items.length; i++) {
+      var item = await Item.findById(order.items[i].item._id)
+      await Item.updateOne({ '_id': order.items[i].item._id }, {quantity: item.quantity + order.items[i].count})
     }
-    await Order.updateOne({ '_id': orderId },{status:constants.types.orderStatus.paymentFailed,failureReason:msg})
+    await Order.updateOne({ '_id': req.body.orderId },{status:constants.types.orderStatus.paymentFailed,failureReason:msg})
   }
 
 };

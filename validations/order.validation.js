@@ -1,33 +1,33 @@
 const Joi = require('joi')
+Joi.objectId = require('joi-objectid')(Joi);
 const constants = require('../config/constants.json')
 
 module.exports = {
     
      createOrderValidation : Order => {
         const orderSchema = Joi.object({
-            userId:Joi.required(),
-            payment:Joi.required(),
-            status: Joi.forbidden(),
-            totalPrice:Joi.number().integer().min(1).max(1.7976931348623157e+308).required()
+            status: Joi.forbidden()
             })
 
             return orderSchema.validate(Order)
         },
 
-        deleteOrderValidation : Order => {
-            const orderSchema = Joi.object({
-                status:Joi.string().valid(constants.types.orderStatus.pending).required()
-                })
-    
-                return orderSchema.validate(Order)
-            },
 
         filterOrderValidation : Order => {
             const orderSchema = Joi.object({
                 status:Joi.string().valid(constants.types.orderStatus.pending,constants.types.orderStatus.paid,constants.types.orderStatus.paymentFailed,constants.types.orderStatus.paymentProcessing).required()
                 })
                 
-                Order.status = Order.status.toUpperCase()
+                if(Order.status)
+                    Order.status = Order.status.toUpperCase()
+                return orderSchema.validate(Order)
+            },
+
+        OrderIdValidation : Order => {
+            const orderSchema = Joi.object({
+                orderId:Joi.objectId().required()
+                })
+                
                 return orderSchema.validate(Order)
             }
 }

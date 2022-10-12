@@ -28,13 +28,14 @@
             "getOrderById":"/:id",
             "getUserOrders":"/all/customer",
             "deleteOrder":"/delete/:id",
-            "getAllOrders":"/all/admin"
+            "getAllOrders":"/all/admin",
+            "processToPayment":"/process/pay"
         }
     },
     "transaction":{
         "baseUri":"/api/transactions",
         "api":{
-            "charge":"/charge",
+            "charge":"/user/charge",
             "getTransactionById":"/:id",
             "getAllCustomerTransactions":"/all/customer",
             "getAllTransactions":"/all/admin"

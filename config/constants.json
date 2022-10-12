@@ -24,7 +24,10 @@
         "itemNotInCart":"Item is not in your cart",
         "emptyCart":"Cart is empty",
         "itemNotAvailable":" Item not Available",
-        "deletePendingOrderOnly": "Only pending Orders can be deleted"
+        "deletePendingOrderOnly": "Only pending Orders can be deleted",
+        "payForPendingOrdersOnly": "Only pending Orders can proceed to payment",
+        "chargeForProcessingPaymentOrdersOnly": "Only pending Orders can proceed to payment",
+        "paymentRequestAccepted": "The payment request has been accepted for processing"
     },
     "types":{
         "user":{

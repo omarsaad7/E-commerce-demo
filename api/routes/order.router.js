@@ -9,7 +9,8 @@ const {
   getOrderById,
   getAllCustomerOrders,
   getAllOrders,
-  deleteOrder
+  deleteOrder,
+  processToPaymentOrder
 } = Controller
 
 router.post(uri.order.api.createOrder,verify ,createOrder)
@@ -17,6 +18,7 @@ router.get(uri.order.api.getOrderById,verify,getOrderById)
 router.get(uri.order.api.getAllOrders, verify, getAllOrders)
 router.get(uri.order.api.getUserOrders,verify,getAllCustomerOrders)
 router.delete(uri.order.api.deleteOrder,verify,deleteOrder)
+router.post(uri.order.api.processToPayment,verify ,processToPaymentOrder)
 
 
 

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const constants = require('../config/constants.json')
-
+const Item = require("./item.model")
 // Payment Schema
 const payment = new Schema(
   {
@@ -27,10 +27,12 @@ const orderSchema = new Schema(
       required : true
     },
     totalPrice: { type : Number , required : true},
+    items:[{item:Item.schema,count:Number}],
     payment: payment,
     status:{
       type: String,
-      enum : [constants.types.orderStatus.pending,constants.types.orderStatus.paid,constants.types.orderStatus.paymentFailed],
+      enum : [constants.types.orderStatus.pending, constants.types.orderStatus.paid,
+        constants.types.orderStatus.paymentFailed, constants.types.orderStatus.paymentProcessing],
       default: constants.types.orderStatus.pending
   },
   failureReason: String,
