@@ -33,7 +33,8 @@
         "orderStatus":{
             "pending":"PENDING",
             "paid":"PAID",
-            "paymentFailed":"PAYMENTFAILED"
+            "paymentFailed":"PAYMENTFAILED",
+            "paymentProcessing":"PAYMENTPROCESSING"
         }
     },
     "headers":{

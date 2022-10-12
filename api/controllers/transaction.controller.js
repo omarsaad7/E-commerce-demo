@@ -18,11 +18,14 @@ const chargeUser = async (payment,itemsList,orderId,userId) => {
       await Order.updateOne({ '_id': orderId },{transactionId:transaction._id,status:constants.types.orderStatus.paid,receiptUrl: transaction.receipt_url})
   }
   catch(error){
+    var msg = error.message
+    if(error.response && error.response.data && error.response.data.error && error.response.data.error.message)
+      msg = error.response.data.error.message
     for (let i = 0; i < itemsList.length; i++) {
       var item = await Item.findById(itemsList[i].item._id)
       await Item.updateOne({ '_id': itemsList[i].item._id }, {quantity: item.quantity + itemsList[i].count})
     }
-    await Order.updateOne({ '_id': orderId },{status:constants.types.orderStatus.paymentFailed,failureReason:error.message})
+    await Order.updateOne({ '_id': orderId },{status:constants.types.orderStatus.paymentFailed,failureReason:msg})
   }
 
 };
@@ -100,27 +103,36 @@ getAllTransactions =  (req, res) => {
 };
 
 //get a User all his transactions
-getCustomerTransactions =  (req, res) => {
-  try {
-    // Get UserId
-    const userId = getUserId(req.headers.authorization)
-    User.findById(userId)
-      .then(user => {
-        // return If no user is found
-        if(!user)
-          return res.status(422).json({
-            error: constants.errorMessages.noUserFound
-          });
-          //get all Transactions
-           Transaction.find({userId:userId}).then((transactions) => {
-            return res.json({ data: transactions })
+getCustomerTransactions = async (req, res) => {
+      const userId = getUserId(req.headers.authorization)
+      const user = await User.findById(userId)
+      if(!user) 
+        return res.status(422).json({error: constants.errorMessages.noUserFound});
+
+        // make pagination in order not to load all orders 
+      // set default limit to 10 and start page to 1 
+      // page and limit are changed to the values provided in the url
+      const { page = 1, limit = 10 } = req.query
+      // sort the data with the latest come first and return the needed Items and the total number of Items
+      Transaction.find({userId:userId}).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+        .then((transactions) => {
+          //Count All Transactions
+          Transaction.countDocuments({userId:userId}).then((count)=>{
+            res.json({
+              msg:constants.errorMessages.success,
+              totalSize: count,
+              page:page,
+              limit:limit,
+              data: transactions,
+            })
           })
-           
-      })
-  }
-  catch (error) { res.status(422).json({
-    error: error.message
-  }); }
+          
+        })
+        .catch((error) => {
+          res.status(400).json({
+            err: error.message,
+          })
+        })
 };
 
 

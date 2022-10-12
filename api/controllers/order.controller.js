@@ -1,7 +1,7 @@
 const User = require("../../models/user.model")
 const Item = require("../../models/item.model")
 const Order = require("../../models/order.model")
-const { deleteOrderValidation,createOrderValidation } = require('../../validations/order.validation')
+const { deleteOrderValidation,createOrderValidation,filterOrderValidation } = require('../../validations/order.validation')
 const { chargeValidation } = require('../../validations/transaction.validation')
 const constants = require('../../config/constants.json')
 const {getUserId} = require('./auth.controller.js')
@@ -75,9 +75,9 @@ const getTotalPriceAndUpdateItems = async (user) => {
   return {totalPrice:totalPrice, itemsList:itemsList}
 }
 
-//get item by id (No Auth required)
+//get Order by id
 const getOrderById = (req, res) => {
-  //search for the Item with the requested id
+  //search for the Order with the requested id
   Order.findById(req.params.id)
   .then(foundTarget => {
     // Throw Error if no user is found
@@ -96,24 +96,35 @@ const getOrderById = (req, res) => {
 };
 
 
-//get all items (No Auth required)
-const getAllItems =  (req, res) => {
-  
-      // make pagination in order not to load all items 
+//get all customer orders
+const getAllCustomerOrders = async (req, res) => {
+
+      const userId = getUserId(req.headers.authorization)
+      const user = await User.findById(userId)
+      if(!user) 
+        return res.status(422).json({error: constants.errorMessages.noUserFound});
+
+        // make pagination in order not to load all orders 
       // set default limit to 10 and start page to 1 
       // page and limit are changed to the values provided in the url
-      const { page = 1, limit = 10 } = req.query
+      const { page = 1, limit = 10, status } = req.query 
+      findQuery = {userId:userId}
+      if(status){
+        const { error } = filterOrderValidation({status:req.query.status})
+        if (error) return res.status(400).json({error:error.details[0].message})
+        findQuery.status = req.query.status.toUpperCase()
+      }
       // sort the data with the latest come first and return the needed Items and the total number of Items
-      Item.find().sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
-        .then((items) => {
-          //Count All Items
-          Item.countDocuments().then((count)=>{
+      Order.find(findQuery).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+        .then((orders) => {
+          //Count All Orders
+          Order.countDocuments(findQuery).then((count)=>{
             res.json({
               msg:constants.errorMessages.success,
               totalSize: count,
               page:page,
               limit:limit,
-              data: items,
+              data: orders,
             })
           })
           
@@ -160,7 +171,8 @@ const deleteItem = async (req, res) => {
 
 module.exports = {
   createOrder,
-  getOrderById
+  getOrderById,
+  getAllCustomerOrders
 };
 
 

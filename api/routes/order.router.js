@@ -6,13 +6,14 @@ const uri = require('../../config/uri.json')
 
 const {
   createOrder,
-  getOrderById
+  getOrderById,
+  getAllCustomerOrders
 } = Controller
 
 router.post(uri.order.api.createOrder,verify ,createOrder)
 router.get(uri.order.api.getOrderById,verify,getOrderById) 
 // router.get(uri.transaction.api.getAllTransactions, verify, getAllTransactions)
-// router.get(uri.transaction.api.getAllCustomerTransactions,verify,getCustomerTransactions)
+router.get(uri.order.api.getUserOrders,verify,getAllCustomerOrders)
 
 
 

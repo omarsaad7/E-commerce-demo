@@ -20,6 +20,15 @@ module.exports = {
                 })
     
                 return orderSchema.validate(Order)
+            },
+
+        filterOrderValidation : Order => {
+            const orderSchema = Joi.object({
+                status:Joi.string().valid(constants.types.orderStatus.pending,constants.types.orderStatus.paid,constants.types.orderStatus.paymentFailed,constants.types.orderStatus.paymentProcessing).required()
+                })
+                
+                Order.status = Order.status.toUpperCase()
+                return orderSchema.validate(Order)
             }
 }
    
