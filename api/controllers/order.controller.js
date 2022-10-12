@@ -194,7 +194,7 @@ const deleteOrder = async (req, res) => {
           if(order.status !== constants.types.orderStatus.pending)
             return res.status(422).send({ error: constants.errorMessages.deletePendingOrderOnly })
           
-          await Order.remove({"_id":id})
+          await Order.deleteOne({"_id":id})
           res.json({ msg: constants.errorMessages.success });
   }
   catch (error) {
