@@ -74,33 +74,42 @@ const getTransactionById = (req, res) => {
 
 
 //get all Transactions (Only Admins can access this api)
-getAllTransactions =  (req, res) => {
-  try {
-    // Get User and make sure that user type is admin
+getAllTransactions = async (req, res) => {
+
     const userId = getUserId(req.headers.authorization)
-    User.findById(userId)
-      .then(user => {
-        // return If no user is found
-        if(!user)
-          return res.status(422).json({
-            error: constants.errorMessages.noUserFound
-          });
-          //Forbidden if user type is not an admin
-          if(user.type !== constants.types.user.admin)
-            return res.status(403).json({
-              error: constants.errorMessages.forbidden
-            });
-          //get all Transactions
-           Transaction.find().then((transactions) => {
-            return res.json({ data: transactions })
+      const user = await User.findById(userId)
+      if(!user) 
+        return res.status(422).json({error: constants.errorMessages.noUserFound});
+      if(user.type !== constants.types.user.admin)
+        return res.status(403).json({
+          error: constants.errorMessages.forbidden
+        });
+        // make pagination in order not to load all orders 
+      // set default limit to 10 and start page to 1 
+      // page and limit are changed to the values provided in the url
+      const { page = 1, limit = 10 } = req.query
+      // sort the data with the latest come first and return the needed Items and the total number of Items
+      Transaction.find().sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+        .then((transactions) => {
+          //Count All Transactions
+          Transaction.countDocuments().then((count)=>{
+            res.json({
+              msg:constants.errorMessages.success,
+              totalSize: count,
+              page:page,
+              limit:limit,
+              data: transactions,
+            })
           })
-           
-      })
-  }
-  catch (error) { res.status(422).json({
-    error: error.message
-  }); }
-};
+          
+        })
+        .catch((error) => {
+          res.status(400).json({
+            err: error.message,
+          })
+        })
+}
+
 
 //get a User all his transactions
 getCustomerTransactions = async (req, res) => {

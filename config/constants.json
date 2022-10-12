@@ -23,7 +23,8 @@
         "expiryDateValidation":"The expiry date is before today's date. Please select a valid expiry date",
         "itemNotInCart":"Item is not in your cart",
         "emptyCart":"Cart is empty",
-        "itemNotAvailable":" Item not Available"
+        "itemNotAvailable":" Item not Available",
+        "deletePendingOrderOnly": "Only pending Orders can be deleted"
     },
     "types":{
         "user":{

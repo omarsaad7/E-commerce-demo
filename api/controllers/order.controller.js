@@ -137,29 +137,65 @@ const getAllCustomerOrders = async (req, res) => {
     
 }
 
-// Delete Item (Only Admin)
-const deleteItem = async (req, res) => {
+
+
+//get all orders(Only Admin)
+const getAllOrders = async (req, res) => {
+
+  const userId = getUserId(req.headers.authorization)
+  const user = await User.findById(userId)
+  if(!user) 
+    return res.status(422).json({error: constants.errorMessages.noUserFound});
+  if(user.type !== constants.types.user.admin)
+    return res.status(403).json({
+      error: constants.errorMessages.forbidden
+    });
+    // make pagination in order not to load all orders 
+  // set default limit to 10 and start page to 1 
+  // page and limit are changed to the values provided in the url
+  const { page = 1, limit = 10, status } = req.query 
+  findQuery = {}
+  if(status){
+    const { error } = filterOrderValidation({status:req.query.status})
+    if (error) return res.status(400).json({error:error.details[0].message})
+    findQuery.status = req.query.status.toUpperCase()
+  }
+  // sort the data with the latest come first and return the needed Items and the total number of Items
+  Order.find(findQuery).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+    .then((orders) => {
+      //Count All Orders
+      Order.countDocuments(findQuery).then((count)=>{
+        res.json({
+          msg:constants.errorMessages.success,
+          totalSize: count,
+          page:page,
+          limit:limit,
+          data: orders,
+        })
+      })
+      
+    })
+    .catch((error) => {
+      res.status(400).json({
+        err: error.message,
+      })
+    })
+
+}
+
+// Delete Order
+const deleteOrder = async (req, res) => {
   try {
-    // Get User and make sure that user type is admin
-    const userId = getUserId(req.headers.authorization)
-    User.findById(userId)
-      .then(async (user) => {
-        // return If no user is found
-        if(!user)
-          return res.status(422).json({
-            error: constants.errorMessages.noUserFound
-          });
-          //Forbidden if user type is not an admin
-          if(user.type !== constants.types.user.admin)
-            return res.status(403).json({
-              error: constants.errorMessages.forbidden
-            });
+
 
           const id = req.params.id;
-          const deletedTarget = await Item.findByIdAndRemove(id)
-          if (!deletedTarget) return res.status(404).send({ error: constants.errorMessages.noItemFound })
+          const order = await Order.findById(id)
+          if (!order) return res.status(404).send({ error: constants.errorMessages.noOrderFound })
+          if(order.status !== constants.types.orderStatus.pending)
+            return res.status(422).send({ error: constants.errorMessages.deletePendingOrderOnly })
+          
+          await Order.remove({"_id":id})
           res.json({ msg: constants.errorMessages.success });
-          })
   }
   catch (error) {
     res.status(422).json({
@@ -172,7 +208,9 @@ const deleteItem = async (req, res) => {
 module.exports = {
   createOrder,
   getOrderById,
-  getAllCustomerOrders
+  getAllCustomerOrders,
+  getAllOrders,
+  deleteOrder
 };
 
 
