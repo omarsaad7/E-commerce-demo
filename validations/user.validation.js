@@ -1,5 +1,7 @@
 const Joi = require('joi')
 const Constants = require('../config/constants.json')
+Joi.objectId = require('joi-objectid')(Joi);
+
 module.exports = {
     
     createUserValidation : User => {
@@ -22,7 +24,7 @@ module.exports = {
 
     addItemValidation : item => {
         const itemIdSchema = Joi.object({
-            itemId:Joi.string().required(),
+            itemId:Joi.objectId().required(),
             count:Joi.number().min(1).required(),
             })
 
@@ -30,7 +32,7 @@ module.exports = {
     },
     removeItemValidation : item => {
         const itemIdSchema = Joi.object({
-            itemId:Joi.string().required(),
+            itemId:Joi.objectId().required(),
             })
 
             return itemIdSchema.validate(item)
