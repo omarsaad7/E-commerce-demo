@@ -16,7 +16,8 @@ Login = async (req, res) => {
     
     // Generate and return  token
     const token = jwt.sign({ userId: user._id, userType:user.type}, process.env.TOKEN)
-    res.header('Authorization', token).json({ token: token,userType: user.type})
+    res.header('Authorization', token).json({msg:constants.errorMessages.success,
+    data:{userId:user._id, token: token,userType: user.type}})
   } catch (error) { res.status(400).json({ error: error.message }) }
 }
 

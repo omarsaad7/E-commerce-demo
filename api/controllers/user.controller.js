@@ -23,9 +23,10 @@ const createCustomer = async (req, res) => {
       const token = jwt.sign({ userId: createdTarget._id, userType:createdTarget.type}, process.env.TOKEN)
       res.json({
         msg: constants.errorMessages.success,
-        id: createdTarget._id,
-        name:createdTarget.username,
-        token: token
+        data:{
+          userId: createdTarget._id,
+          name:createdTarget.username,
+          token: token}
       });
     },
     )
