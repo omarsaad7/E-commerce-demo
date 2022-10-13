@@ -17,7 +17,7 @@ module.exports = {
             const itemSchema = Joi.object({
                 quantity:Joi.number().min(1).max(1.7976931348623157e+308),
                 name: Joi.string().min(1).max(30),
-                description: Joi.string().min(1).max(50),
+                description: Joi.string().min(1).max(100),
                 img: Joi.string(),
                 price:Joi.number().min(1).max(1.7976931348623157e+308)
                 })
