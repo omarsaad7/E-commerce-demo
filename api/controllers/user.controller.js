@@ -60,28 +60,47 @@ const getUserById = (req, res) => {
 
 
 //get all users (Only Admins can access this api)
-const getAllCustomers =  (req, res) => {
+const getAllCustomers = async (req, res) => {
   try {
     // Get User and make sure that user type is admin
     const userId = getUserId(req.headers.authorization)
-    User.findById(userId)
-      .then(user => {
-        // return If no user is found
-        if(!user)
-          return res.status(422).json({
-            error: constants.errorMessages.noUserFound
-          });
-          //Forbidden if user type is not an admin
-          if(user.type !== constants.types.user.admin)
-            return res.status(403).json({
-              error: constants.errorMessages.forbidden
-            });
-          //get all Customers
-           User.find({type:constants.types.user.customer}).then((users) => {
-            return res.json({ data: users })
+    const user = await User.findById(userId)
+    // return If no user is found
+    if(!user)
+      return res.status(422).json({
+        error: constants.errorMessages.noUserFound
+      });
+    //Forbidden if user type is not an admin
+    if(user.type !== constants.types.user.admin)
+      return res.status(403).json({
+        error: constants.errorMessages.forbidden
+      });
+
+        // make pagination in order not to load all customers 
+      // set default limit to 10 and start page to 1 
+      // page and limit are changed to the values provided in the url
+      const { page = 1, limit = 10 } = req.query
+      // sort the data with the latest come first and return the needed Items and the total number of Items
+      User.find({type:constants.types.user.customer}).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+        .then((users) => {
+          //Count All Transactions
+          User.countDocuments({type:constants.types.user.customer}).then((count)=>{
+            res.json({
+              msg:constants.errorMessages.success,
+              totalSize: count,
+              page:page,
+              limit:limit,
+              data: users,
+            })
           })
-           
-      })
+          
+        })
+        .catch((error) => {
+          res.status(400).json({
+            err: error.message,
+          })
+        })
+
   }
   catch (error) { res.status(422).json({
     error: error.message

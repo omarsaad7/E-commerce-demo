@@ -108,7 +108,7 @@ getAllTransactions = async (req, res) => {
         return res.status(403).json({
           error: constants.errorMessages.forbidden
         });
-        // make pagination in order not to load all orders 
+        // make pagination in order not to load all transactions 
       // set default limit to 10 and start page to 1 
       // page and limit are changed to the values provided in the url
       const { page = 1, limit = 10 } = req.query
