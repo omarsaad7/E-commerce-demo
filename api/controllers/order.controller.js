@@ -28,6 +28,7 @@ const createOrder = async (req, res) => {
 
     const createOrderData = {userId:userId, totalPrice:totalPrice,payment:req.body.payment,items:user.cart}    
     const order = await Order.create(createOrderData)
+    await User.updateOne({ '_id': userId }, {cart:[]})
     res.json({msg:constants.errorMessages.success,data:order})
 
   }
