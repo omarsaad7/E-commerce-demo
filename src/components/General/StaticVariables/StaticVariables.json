@@ -6,8 +6,9 @@
     "emptyPassword": "Password shouldn't be empty",
     "emptyUsername": "Username shouldn't be empty",
     "somethingWrong":"OOPS!! Something went wrong. Try again",
-    "noItemsTOShow":"No more Items To Sell",
-    "itemAdded":"Item is added to your cart successfully"
+    "noItemsTOShow":"No more Items To show",
+    "itemAdded":"Item is added to your cart successfully",
+    "itemRemoved":"Item is removed from your cart successfully"
   },
   "imgSrc":{
     "celebration":"https://purepng.com/public/uploads/large/celebration-confetti-1bp.png"

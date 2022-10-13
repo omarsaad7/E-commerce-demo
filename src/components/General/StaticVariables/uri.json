@@ -1,5 +1,8 @@
 {
     "home":"/",
     "login":"/logIn",
-    "signUp":"/signup"
+    "signUp":"/signup",
+    "cart": "/cart",
+    "order": "/orderId/:id"
+
 }

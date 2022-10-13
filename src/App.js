@@ -8,6 +8,8 @@ import Documentation from './components/Documentation/Documentation.jsx'
 import Home from './components/Home/Home.jsx'
 import Trial from './components/Trial/Trial.jsx'
 import SignIn from './components/SignIn/SignIn.jsx'
+import Cart from './components/ShoppingCart/Cartt'
+import Order from './components/Order/Order'
 import StoreDashboard from './components/StoreDashboard/Dashboard.js'
 import uri from './components/General/StaticVariables/uri.json'
 
@@ -19,6 +21,8 @@ class App extends Component {
           <Switch>
             <Route exact path="/" component={() => <Home />} />
             <Route exact path={uri.signUp} component={() => <SignUp />} />
+            <Route exact path={uri.cart} component={() => <Cart />} />
+            <Route exact path={uri.order} component={() => <Order />} />
             <Route
               exact
               path="/receipt/:id"

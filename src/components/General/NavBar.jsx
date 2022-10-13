@@ -5,6 +5,7 @@ import PersonAddAlt1RoundedIcon from '@mui/icons-material/PersonAddAlt1Rounded';
 import IconButton from '@material-ui/core/IconButton'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import DashboardIcon from '@material-ui/icons/Dashboard'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReactTooltip from 'react-tooltip'
 import { logout } from '../General/Functions'
 import {isLoggedIn} from '../General/Functions'
@@ -42,9 +43,7 @@ export default class NavBar extends React.Component {
               />{' '}
             </Navbar.Brand>
             <Nav className="mr-auto">
-              {/* <Nav.Link href="/">Home</Nav.Link> */}
-              <Nav.Link href="/documentation">Documentation</Nav.Link>
-              <Nav.Link href={'/trial'}>Trial</Nav.Link>
+              <Nav.Link href={uri.home}>Shop</Nav.Link>
             </Nav>
             <Form inline bg="dark" variant="dark">
               <dev  style= {{paddingRight:'10px'}}>
@@ -74,11 +73,29 @@ export default class NavBar extends React.Component {
                 className="d-inline-block align-top"
               />{' '}
             </Navbar.Brand>
+            <Nav className="mr-auto">
+              <Nav.Link href={uri.home}>Shop</Nav.Link>
+            </Nav> 
             <Nav className="mr-auto"/>
-              
+            
             
             <Form inline bg="dark" variant="dark">
               <div>
+              <IconButton
+                  aria-label="delete"
+                  onClick={() => (window.location.href = uri.cart)}
+                >
+                  {/* <div style={{ color: 'white' }}> */}
+                  <ShoppingCartIcon
+                    style={{ color: 'white' }}
+                    data-tip
+                    data-for="cart"
+                  />
+                  <ReactTooltip id="cart" type="dark">
+                    <span>Shopping Cart</span>
+                  </ReactTooltip>
+                  {/* </div> */}
+                </IconButton>
                 <IconButton
                   aria-label="delete"
                   onClick={() => (window.location.href = '/store/dashboard')}

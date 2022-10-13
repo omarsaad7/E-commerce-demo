@@ -8,12 +8,9 @@ import staticVariables from '../General/StaticVariables/StaticVariables.json'
 import backendUrls from '../General/StaticVariables/backEndUrls.json'
 import { ToastContainer, toast } from 'react-toastify'
 import LoadingIcon from '../General/Loading.js'
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import {Form, Button } from 'react-bootstrap'
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
-import {isLoggedIn} from '../General/Functions'
-import uri from '../General/StaticVariables/uri.json'
+import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
+import { Button } from 'react-bootstrap'
+
 
 export default class Items extends Component {
 
@@ -22,6 +19,7 @@ export default class Items extends Component {
     this.state = {
       loading: false,
       addItemloading:false,
+      placeOrderloading:false,
       items: [],
       error:false,
       limit:12,
@@ -30,33 +28,24 @@ export default class Items extends Component {
     }
   }
 
-  async nextPage(){
-    var totalPages = Math.ceil(this.state.totalSize / this.state.limit)
-    if(totalPages > this.state.page){
-      await this.getItems(this.state.page+1,this.state.limit)
-      this.setState({ page: this.state.page+1 })
-    }
-  }
 
-  async previousPage(){
-    if(this.state.page>1){
-      await this.getItems(this.state.page-1,this.state.limit)
-      this.setState({ page: this.state.page-1 })
-    }
-  }
-
-  async getItems(page,limit){
+  async getItems(){
     this.setState({ loading: true })
+    const headers = {
+      Authorization: localStorage.getItem('token'),
+    }
     await axios
       .get(
-        backendUrls.host + backendUrls.item.baseUri + backendUrls.item.api.getAllItems + `?limit=${limit}&page=${page}`,
+        backendUrls.host + backendUrls.user.baseUri + backendUrls.user.api.getUserById.replace(':id', localStorage.getItem('userId')),{
+          headers: headers,
+        }
       )
       .then((response) => {
         
           this.setState({
-            items: response.data.data,
+            items: response.data.data.cart,
             totalSize:response.data.totalSize,
-            loading: false,
+            loading: false
           })
       })
       .catch((error) => {
@@ -69,22 +58,17 @@ export default class Items extends Component {
   }
 
 
-  async addItemToBag(itemId){
-    if(!isLoggedIn()){
-      window.location.href = uri.login;
-      return
-    }
+  async removeItemFromBag(itemId,i){
     this.setState({ addItemloading: true })
     const headers = {
       Authorization: localStorage.getItem('token'),
     }
     const body = {
-      itemId: itemId,
-      count: 1
+      itemId: itemId
   }
     await axios
       .post(
-        backendUrls.host + backendUrls.user.baseUri + backendUrls.user.api.addItem ,body, {
+        backendUrls.host + backendUrls.user.baseUri + backendUrls.user.api.removeItem ,body, {
           headers: headers,
         }
       )
@@ -93,7 +77,12 @@ export default class Items extends Component {
           this.setState({
             addItemloading: false
           })
-          toast.success(staticVariables.messages.itemAdded)
+          toast.success(staticVariables.messages.itemRemove)
+          var arrItems = this.state.items
+          arrItems.splice(i, 1)
+          this.setState({
+            items:arrItems
+          })
       })
       .catch((error) => {
         if(error.response && error.response.data && error.response.data.error)
@@ -101,6 +90,41 @@ export default class Items extends Component {
          else
           toast.error(staticVariables.messages.somethingWrong)
         this.setState({ addItemloading: false })
+      })
+  }
+
+  async placeOrder(){
+    this.setState({ addItemloading: true, placeOrderloading:true })
+    const headers = {
+      Authorization: localStorage.getItem('token'),
+    }
+    const body = {
+      
+  }
+    await axios
+      .post(
+        backendUrls.host + backendUrls.order.baseUri + backendUrls.order.api.createOrder ,body, {
+          headers: headers,
+        }
+      )
+      .then((response) => {
+        
+          this.setState({
+            addItemloading: false,
+            placeOrderloading:false
+          })
+          toast.success(staticVariables.messages.itemRemove)
+          window.location.href = '/store/dashboard'
+      })
+      .catch((error) => {
+        if(error.response && error.response.data && error.response.data.error)
+          toast.error(error.response.data.error)
+         else
+          toast.error(staticVariables.messages.somethingWrong)
+          this.setState({
+            addItemloading: false,
+            placeOrderloading:false
+          })
       })
   }
 
@@ -119,24 +143,30 @@ export default class Items extends Component {
       {this.state.loading?( <LoadingIcon type="spin" color="#00ff00" />):this.state.items.length===0?(<h1>{staticVariables.messages.noItemsTOShow}</h1>):(
         <div>
     <Row xs={1} md={3} className="g-4">
-      {this.state.items.map((item) => (
+      {this.state.items.map((item,i) => (
         <Col>
         <div style={{paddingBottom:'20px'}}>
           <Card>
-            <Card.Img variant="top" src={item.img} />
+            <Card.Img variant="top" src={item.item.img} />
             <Card.Body>
-              <Card.Title>{item.name}</Card.Title>
+              <Card.Title>{item.item.name}</Card.Title>
               <Card.Text>
-              {item.description}
+              {item.item.description}
               </Card.Text>
               <Card.Text>
-              Price: {this.itemPrice(item.price)}$
+              Price per each: {this.itemPrice(item.item.price)}$
+              </Card.Text>
+              <Card.Text>
+              Quantity: {item.count}
+              </Card.Text>
+              <Card.Text>
+              Total Price: {this.itemPrice(item.item.price * item.count)}$
               </Card.Text>
               <Button 
                         disabled={this.state.addItemloading}
-                        onClick={(e) => this.addItemToBag(item._id)}
-                         variant="outline-success">
-                 Add To Cart <AddShoppingCartIcon />
+                        onClick={(e) => this.removeItemFromBag(item.item._id,i)}
+                         variant="outline-danger">
+                 Remove From Cart <RemoveShoppingCartIcon />
               </Button>
             </Card.Body>
           </Card>
@@ -144,22 +174,15 @@ export default class Items extends Component {
         </Col>
       ))}
     </Row>
-    <Form inline bg="dark" variant="dark">
-              <dev  style= {{paddingRight:'10px'}}>
-            <Button disabled={this.state.page<=1}
-                        onClick={(e) => this.previousPage(e)}
-                         variant="outline-success">
-                <ArrowLeftIcon /> Previous
-              </Button>
-              </dev>
-              {'  '}
-              <Button 
-                        disabled={Math.ceil(this.state.totalSize / this.state.limit)<=this.state.page}
-                        onClick={(e) => this.nextPage(e)}
-                         variant="outline-success">
-                 Next <ArrowRightIcon />
-              </Button>
-            </Form>
+    <Button 
+    variant="success"
+     size="lg" block
+     onClick={(e) => this.placeOrder()}
+     >{!this.state.placeOrderloading ? (
+      'Make Order'
+    ) : (
+      <LoadingIcon color="#ffffff" />
+    )}</Button>
     </div>
     
                         )}
