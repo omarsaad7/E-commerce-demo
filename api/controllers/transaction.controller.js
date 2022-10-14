@@ -129,7 +129,7 @@ getAllTransactions = async (req, res) => {
         })
         .catch((error) => {
           res.status(400).json({
-            err: error.message,
+            error: error.message,
           })
         })
 }
@@ -163,7 +163,7 @@ getCustomerTransactions = async (req, res) => {
         })
         .catch((error) => {
           res.status(400).json({
-            err: error.message,
+            error: error.message,
           })
         })
 };

@@ -89,7 +89,7 @@ const getAllItems =  (req, res) => {
         })
         .catch((error) => {
           res.status(400).json({
-            err: error.message,
+            error: error.message,
           })
         })
     
@@ -127,7 +127,7 @@ const updateItem = async (req, res) => {
   }
   catch (error) {
     res.status(422).json({
-      err: error.message
+      error: error.message
     });
   }
 }

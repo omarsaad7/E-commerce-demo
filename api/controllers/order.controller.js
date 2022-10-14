@@ -29,7 +29,7 @@ const createOrder = async (req, res) => {
     const createOrderData = {userId:userId, totalPrice:totalPrice,payment:req.body.payment,items:user.cart}    
     const order = await Order.create(createOrderData)
     await User.updateOne({ '_id': userId }, {cart:[]})
-    res.json({msg:constants.errorMessages.success,data:order})
+    res.json({msg:constants.errorMessages.success,data:order})  
 
   }
   catch (error) { 
@@ -127,7 +127,7 @@ const getAllCustomerOrders = async (req, res) => {
         })
         .catch((error) => {
           res.status(400).json({
-            err: error.message,
+            error: error.message,
           })
         })
     
@@ -173,7 +173,7 @@ const getAllOrders = async (req, res) => {
     })
     .catch((error) => {
       res.status(400).json({
-        err: error.message,
+        error: error.message,
       })
     })
 
