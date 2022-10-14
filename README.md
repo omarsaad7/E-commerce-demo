@@ -29,7 +29,7 @@ Deployment made using Vercel for frontend and Heroku for backend
 
 * [Back-end](https://e-commerce-demo-api.herokuapp.com/)
 
-Note: Heroku makes the app sleeps after a while of not using it. So backend deployment takes a little bit longer time for the first api call as it starts the application
+Note: Heroku free deployment used makes the app sleeps after a while of not using it. So backend deployment takes a little bit longer time for the first api call as it starts the application
 
 ## Run and test app on your local machine
 
