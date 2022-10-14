@@ -153,7 +153,7 @@ export default class SignIn extends Component {
 
                       <p style={{ color: 'gray', paddingTop: 5 }}>
                         {staticVariables.messages.signUp} {'  '}
-                        <a href="/subscribe">sign up</a>
+                        <a href={uri.signUp}>sign up</a>
                       </p>
                     </form>
                   </div>

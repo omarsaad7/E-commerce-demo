@@ -13,6 +13,8 @@ import {Styles} from '../General/StaticVariables/Styles.js'
 import Badge from 'react-bootstrap/Badge'
 import Error from '../Error/Error.jsx'
 import uri from '../General/StaticVariables/uri.json'
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 export default class OrderPending extends Component {
 
