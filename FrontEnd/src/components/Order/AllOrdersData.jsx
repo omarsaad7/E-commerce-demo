@@ -144,6 +144,15 @@ export default class AllOrders extends Component {
   Error(msg) {
     return (
       <>
+      <label>Filter by Order Status</label>
+        <DropdownButton id="dropdown-basic-button" title={this.state.status}>
+      <Dropdown.Item onClick={(e) => this.handleStatus('PENDING')}>PENDING</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => this.handleStatus('PAYMENTPROCESSING')}>PAYMENTPROCESSING</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => this.handleStatus('PAYMENTFAILED')}>PAYMENTFAILED</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => this.handleStatus('PAID')}>PAID</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => this.handleStatus('ALL')}>ALL</Dropdown.Item>
+      </DropdownButton> 
+      <br/>
         <TableContainer component={Paper}>
           <Table aria-label="collapsible table">
             <TableHeader />
