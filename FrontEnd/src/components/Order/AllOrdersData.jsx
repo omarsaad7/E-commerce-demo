@@ -28,6 +28,8 @@ import FirstPageIcon from '@material-ui/icons/FirstPage'
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 const useStyles1 = makeStyles((theme) => ({
   root: {
@@ -53,7 +55,7 @@ export default class AllOrders extends Component {
       orders: [],
       ordersTotalCount:0,
       error:false,
-      status:undefined,
+      status:'ALL',
       page:0,
       rowsPerPage:5
       
@@ -76,7 +78,7 @@ export default class AllOrders extends Component {
       Authorization: localStorage.getItem('token'),
     }
     var statusQuery=''
-    if(status)
+    if(status && status!=='ALL')
       statusQuery = `&status=${status}`
     var query = `?limit=${rowsPerPage}&page=${page+1}${statusQuery}`
     await axios
@@ -164,6 +166,10 @@ export default class AllOrders extends Component {
     )
   }
 
+  handleStatus(status){
+    this.setState({ status: status })
+    this.getItems(this.state.rowsPerPage, 0,status)
+  }
   render() {
     if (this.state.loading) {
       return this.loading()
@@ -176,6 +182,15 @@ export default class AllOrders extends Component {
     } else {
       return (
         <>
+        <label>Filter by Order Status</label>
+        <DropdownButton id="dropdown-basic-button" title={this.state.status}>
+      <Dropdown.Item onClick={(e) => this.handleStatus('PENDING')}>PENDING</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => this.handleStatus('PAYMENTPROCESSING')}>PAYMENTPROCESSING</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => this.handleStatus('PAYMENTFAILED')}>PAYMENTFAILED</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => this.handleStatus('PAID')}>PAID</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => this.handleStatus('ALL')}>ALL</Dropdown.Item>
+      </DropdownButton> 
+    <br/>
           <TableContainer component={Paper}>
             <Table aria-label="collapsible table">
               <TableHeader />
