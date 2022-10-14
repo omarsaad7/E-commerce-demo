@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import Alert from 'react-bootstrap/Alert'
-import 'react-phone-input-2/lib/style.css'
 import KeyModal from './SubscModal.js'
 import axios from 'axios'
 import staticVariables from '../General/StaticVariables/StaticVariables.json'

@@ -36,7 +36,6 @@ export default class SignIn extends Component {
     await axios
       .post(backendUrls.host + backendUrls.auth.baseUri + backendUrls.auth.api.login, body)
       .then((res) => {
-        console.log(res.data)
         loginLocalStorage(
           res.data.data.token,
           this.state.username,

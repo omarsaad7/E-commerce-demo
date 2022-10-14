@@ -10,6 +10,8 @@ import ReactTooltip from 'react-tooltip'
 import { logout } from '../General/Functions'
 import {isLoggedIn} from '../General/Functions'
 import uri from '../General/StaticVariables/uri.json'
+import EditIcon from '@mui/icons-material/Edit';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 export default class NavBar extends React.Component {
   constructor(props) {
@@ -98,16 +100,31 @@ export default class NavBar extends React.Component {
                 </IconButton>
                 <IconButton
                   aria-label="delete"
-                  onClick={() => (window.location.href = '/store/dashboard')}
+                  onClick={() => (window.location.href = uri.update)}
                 >
                   {/* <div style={{ color: 'white' }}> */}
-                  <DashboardIcon
+                  <EditIcon
                     style={{ color: 'white' }}
                     data-tip
-                    data-for="dashboard"
+                    data-for="editAccount"
                   />
-                  <ReactTooltip id="dashboard" type="dark">
-                    <span>Dashboard</span>
+                  <ReactTooltip id="editAccount" type="dark">
+                    <span>Edit Account</span>
+                  </ReactTooltip>
+                  {/* </div> */}
+                </IconButton>
+                <IconButton
+                  aria-label="delete"
+                  onClick={() => (window.location.href = uri.orders)}
+                >
+                  {/* <div style={{ color: 'white' }}> */}
+                  <ReceiptIcon
+                    style={{ color: 'white' }}
+                    data-tip
+                    data-for="orders"
+                  />
+                  <ReactTooltip id="orders" type="dark">
+                    <span>My Orders</span>
                   </ReactTooltip>
                   {/* </div> */}
                 </IconButton>

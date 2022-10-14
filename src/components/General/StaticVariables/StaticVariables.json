@@ -13,7 +13,9 @@
     "OrderReadyToBePaid":"You can Now Pay For Your Order",
     "invalidCardNumber":"Card Number should contain 16 digits",
     "invalidCvc": "CVC should contain 3 digits",
-    "invalidExpiryDate": "Invalid Expiry Date"
+    "invalidExpiryDate": "Invalid Expiry Date",
+    "updatedSuccessfully":"Updated Successfully",
+    "noOrdersTOShow": "No Orders Found. Your Orders will appear here"
   },
   "imgSrc":{
     "celebration":"https://purepng.com/public/uploads/large/celebration-confetti-1bp.png",
