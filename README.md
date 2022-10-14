@@ -41,7 +41,7 @@ You need to install git and npm on your machine.
 Clone the repo
 
 ```
-git clone https://github.com/AtosBeatTheReceipt/AtosBTR
+git clone https://github.com/omarsaad7/E-commerce-demo.git
 ```
 #### Run back-end server
 Get inside back-end folder
