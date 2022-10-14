@@ -77,10 +77,6 @@ npm start
 * Admin Apis has no frontend so you can test them from backend. All admin Apis are found in admin folder in the postman collection provided.
 * For successfull payment process please enter one of the valid testing card found in this [**Link**](https://stripe.com/docs/testing).
 
-### Note
-* The application is designed to be used in stores, integrated to the Point of Sales (POS) systems and run on PCs. While it also functions on mobile devices, it is recommended to view the screen in landscape mode.
-* The delete receipt and delete all receipts features in the dashboard are for testing only but when entering the market they will not appear as it is against the law to delete existing receipts for taxes calculations.
-
 
 ## Author
 
