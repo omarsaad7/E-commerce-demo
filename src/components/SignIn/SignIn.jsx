@@ -13,6 +13,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility'
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff'
 import { isLoggedIn, loginLocalStorage } from '../General/Functions'
 import { Styles } from '../General/StaticVariables/Styles.js'
+import uri from '../General/StaticVariables/uri.json'
 
 export default class SignIn extends Component {
   state = {
@@ -43,7 +44,7 @@ export default class SignIn extends Component {
           res.data.data.userId
         )
         this.setState({ loading: false })
-        window.location.href = '/store/dashboard'
+        window.location.href = uri.home
       })
       .catch((error) => {
         if(error.response && error.response.data && error.response.data.error)
@@ -55,7 +56,7 @@ export default class SignIn extends Component {
 
   componentDidMount() {
     if (isLoggedIn()) {
-      window.location.href = '/store/dashboard'
+      window.location.href = uri.home
     }
   }
   render() {

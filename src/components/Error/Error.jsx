@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
   },
   image: {
-    backgroundImage: 'url(/beatthereceipt.png)',
+    backgroundImage: 'url(/background.jpg)',
     backgroundRepeat: 'no-repeat',
     backgroundColor:
       theme.palette.type === 'light' ? theme.palette.grey[50] : theme.palette.grey[900],
@@ -45,7 +45,6 @@ export default function Error(props) {
   return (
     <div>
             <div  style={Styles.minHeight}>
-    <Navbar/>
     <Grid container component="main" className={classes.root}>
       <CssBaseline />
       <Grid item xs={false} sm={4} md={7} className={classes.image} />
@@ -68,7 +67,6 @@ export default function Error(props) {
       </Grid>
     </Grid>
     </div>
-    <Footer/>
     </div>
   );
 }

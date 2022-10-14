@@ -34,6 +34,7 @@ export default class receipt extends Component {
   }
 
   async componentDidMount() {
+    console.log(this.props.match.params)
     await axios
       .get(
         `${staticVariables.backendURL}/api/receipts/read/${this.props.match.params.id}`

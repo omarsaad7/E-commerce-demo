@@ -18,6 +18,7 @@ import 'react-bootstrap-timezone-picker/dist/react-bootstrap-timezone-picker.min
 import { Styles } from '../General/StaticVariables/Styles.js'
 import LoadingIcon from '../General/Loading.js'
 import backendUrls from '../General/StaticVariables/backEndUrls.json'
+import uri from '../General/StaticVariables/uri.json'
 
 
 export default class createStore extends Component {
@@ -69,7 +70,7 @@ export default class createStore extends Component {
 
   componentDidMount() {
     if (isLoggedIn()) {
-      window.location.href = '/store/dashboard'
+      window.location.href = uri.home
     }
   }
 
@@ -114,7 +115,7 @@ export default class createStore extends Component {
   }
   callbackFunction = (value) => {
     this.setState({ modalShow: value })
-    window.location.href = '/store/dashboard'
+    window.location.href = uri.home
   }
   render() {
     return (
@@ -147,7 +148,7 @@ export default class createStore extends Component {
                         <input
                           id="inputStoreName"
                           class="form-control"
-                          placeholder="Enter Store Name"
+                          placeholder="Enter Username"
                           onChange={this.handleUsernameChange}
                           value={this.state.username}
                           required

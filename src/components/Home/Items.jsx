@@ -164,7 +164,7 @@ export default class Items extends Component {
     
                         )}
     <ToastContainer
-                          position="top-right"
+                          position="top-center"
                           autoClose={3000}
                           hideProgressBar={false}
                           newestOnTop={false}

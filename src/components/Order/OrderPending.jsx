@@ -8,41 +8,50 @@ import staticVariables from '../General/StaticVariables/StaticVariables.json'
 import backendUrls from '../General/StaticVariables/backEndUrls.json'
 import { ToastContainer, toast } from 'react-toastify'
 import LoadingIcon from '../General/Loading.js'
-import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
 import { Button } from 'react-bootstrap'
+import {Styles} from '../General/StaticVariables/Styles.js'
+import Badge from 'react-bootstrap/Badge'
+import Error from '../Error/Error.jsx'
 import uri from '../General/StaticVariables/uri.json'
 
-export default class Items extends Component {
+export default class OrderPending extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
       loading: false,
-      removeItemLoading:false,
-      placeOrderloading:false,
+      deleteOrderLoading:false,
+      processToPaymentLoading:false,
       items: [],
-      error:false
-      
+      totalPrice:undefined,
+      error:false,
+      status:undefined,
+      receiptUrl:undefined,
+      failureReason:undefined
     }
   }
 
 
-  async getItems(){
+  async getData(){
     this.setState({ loading: true })
     const headers = {
       Authorization: localStorage.getItem('token'),
     }
+    
     await axios
       .get(
-        backendUrls.host + backendUrls.user.baseUri + backendUrls.user.api.getUserById.replace(':id', localStorage.getItem('userId')),{
+        backendUrls.host + backendUrls.order.baseUri + backendUrls.order.api.getOrderById.replace(':id', window.location.href.split('/')[4]),{
           headers: headers,
         }
       )
       .then((response) => {
         
           this.setState({
-            items: response.data.data.cart,
-            
+            items: response.data.data.items,
+            totalPrice: response.data.data.totalPrice,
+            status: response.data.data.status,
+            receiptUrl:response.data.data.receiptUrl,
+            failureReason:response.data.data.failureReason,
             loading: false
           })
       })
@@ -56,43 +65,39 @@ export default class Items extends Component {
   }
 
 
-  async removeItemFromBag(itemId,i){
-    this.setState({ removeItemLoading: true })
+  async processToPayment(){
+    this.setState({ processToPaymentLoading: true })
     const headers = {
       Authorization: localStorage.getItem('token'),
     }
     const body = {
-      itemId: itemId
+      orderId: window.location.href.split('/')[4]
   }
     await axios
       .post(
-        backendUrls.host + backendUrls.user.baseUri + backendUrls.user.api.removeItem ,body, {
+        backendUrls.host + backendUrls.order.baseUri + backendUrls.order.api.processToPayment ,body, {
           headers: headers,
         }
       )
       .then((response) => {
         
           this.setState({
-            removeItemLoading: false
+            processToPaymentLoading: false
           })
-          toast.success(staticVariables.messages.itemRemove)
-          var arrItems = this.state.items
-          arrItems.splice(i, 1)
-          this.setState({
-            items:arrItems
-          })
+          toast.success(staticVariables.messages.OrderReadyToBePaid)
+          window.location.href = uri.pay.replace(':id', window.location.href.split('/')[4])
       })
       .catch((error) => {
         if(error.response && error.response.data && error.response.data.error)
           toast.error(error.response.data.error)
          else
           toast.error(staticVariables.messages.somethingWrong)
-        this.setState({ removeItemLoading: false })
+        this.setState({ processToPaymentLoading: false })
       })
   }
 
-  async placeOrder(){
-    this.setState({ removeItemLoading: true, placeOrderloading:true })
+  async DeleteOrder(){
+    this.setState({ deleteOrderLoading: true, processToPaymentLoading:true })
     const headers = {
       Authorization: localStorage.getItem('token'),
     }
@@ -100,19 +105,19 @@ export default class Items extends Component {
       
   }
     await axios
-      .post(
-        backendUrls.host + backendUrls.order.baseUri + backendUrls.order.api.createOrder ,body, {
+      .delete(
+        backendUrls.host + backendUrls.order.baseUri + backendUrls.order.api.deleteOrder.replace(':id', window.location.href.split('/')[4]), {
           headers: headers,
         }
       )
       .then((response) => {
         
           this.setState({
-            removeItemLoading: false,
-            placeOrderloading:false
+            deleteOrderLoading: false,
+            processToPaymentLoading:false
           })
-          toast.success(staticVariables.messages.itemRemove)
-          window.location.href = uri.order.replace(':id',response.data.data._id)
+          toast.success(staticVariables.messages.orderDeleted)
+          window.location.href = uri.home
       })
       .catch((error) => {
         if(error.response && error.response.data && error.response.data.error)
@@ -120,14 +125,14 @@ export default class Items extends Component {
          else
           toast.error(staticVariables.messages.somethingWrong)
           this.setState({
-            removeItemLoading: false,
-            placeOrderloading:false
+            deleteOrderLoading: false,
+            processToPaymentLoading:false,
           })
       })
   }
 
   async componentDidMount() {
-    this.getItems()
+    this.getData()
   }
 
   itemPrice(priceInCents){
@@ -135,11 +140,55 @@ export default class Items extends Component {
     return priceInDollars.toFixed(2)
   }
 
+  getBadgeColor(){
+    switch (this.state.status)
+{
+   case "PENDING": 
+   case "PAYMENTPROCESSING": return '#FFBF00'
+   case "PAYMENTFAILED": return '#ff0000'
+   case "PAID": return '#00ff00'
+   default: return '#FFBF00'
+}
+  }
+
   render() {
   return (
     <div>
-      {this.state.loading?( <LoadingIcon type="spin" color="#00ff00" />):this.state.items.length===0?(<h1>{staticVariables.messages.noItemsTOShow}</h1>):(
+      {this.state.loading?( <LoadingIcon type="spin" color="#00ff00" />):this.state.error?(<Error errorCode="404" errorMessage="Couldn't find Order" />):(
         <div>
+      <h1 style={Styles.centered50}>
+      Your Order <Badge style={{color: this.getBadgeColor(),fontSize:'20px'}} > ({this.state.status})</Badge>
+      </h1>
+          <hr />
+          <h2>Total Price: {this.itemPrice(this.state.totalPrice)}$</h2>
+    <hr />
+    {this.state.status === "PENDING"?(<div>
+      <Button 
+    variant="success"
+     size="lg" block
+     disabled ={this.state.deleteOrderLoading || this.state.processToPaymentLoading}
+     onClick={(e) => this.processToPayment()}
+     >{!this.state.processToPaymentLoading ? (
+      'Process To Payment'
+    ) : (
+      <LoadingIcon color="#ffffff" />
+    )}</Button> 
+    <Button 
+    variant="danger"
+     size="lg" block
+     disabled={this.state.deleteOrderLoading || this.state.processToPaymentLoading}
+     onClick={(e) => this.DeleteOrder()}
+     >{!this.state.deleteOrderLoading ? (
+      'Delete Order'
+    ) : (
+      <LoadingIcon color="#ffffff" />
+    )}</Button></div>) : this.state.status==="PAYMENTPROCESSING"? (
+    <Button  variant="success"size="lg" block href={uri.pay.replace(':id',window.location.href.split('/')[4])}>Pay</Button> ):
+    this.state.status==="PAID"?(<Button  variant="success"size="lg" block onClick={(e) => window.open(this.state.receiptUrl, '_blank', 'noopener,noreferrer')} >
+      View Receipt</Button> )
+      :<h5 style={{color:'red'}}>Failure Reason: {this.state.failureReason}</h5> }
+    <br/>
+    <hr/>
     <Row xs={1} md={3} className="g-4">
       {this.state.items.map((item,i) => (
         <Col>
@@ -160,28 +209,14 @@ export default class Items extends Component {
               <Card.Text>
               Total Price: {this.itemPrice(item.item.price * item.count)}$
               </Card.Text>
-              <Button 
-                        disabled={this.state.removeItemLoading || this.state.placeOrderloading}
-                        onClick={(e) => this.removeItemFromBag(item.item._id,i)}
-                         variant="outline-danger">
-                 Remove From Cart <RemoveShoppingCartIcon />
-              </Button>
             </Card.Body>
           </Card>
           </div>
         </Col>
       ))}
     </Row>
-    <Button 
-    variant="success"
-     size="lg" block
-     onClick={(e) => this.placeOrder()}
-     disabled={this.state.removeItemLoading || this.state.placeOrderloading}
-     >{!this.state.placeOrderloading ? (
-      'Make Order'
-    ) : (
-      <LoadingIcon color="#ffffff" />
-    )}</Button>
+    <hr />
+    
     </div>
     
                         )}

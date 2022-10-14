@@ -3,6 +3,7 @@
     "login":"/logIn",
     "signUp":"/signup",
     "cart": "/cart",
-    "order": "/orderId/:id"
+    "order": "/order/:id",
+    "pay": "/pay/:id"
 
 }
