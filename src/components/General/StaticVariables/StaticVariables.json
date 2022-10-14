@@ -21,36 +21,5 @@
     "celebration":"https://purepng.com/public/uploads/large/celebration-confetti-1bp.png",
     "payment":"https://www.nttdatapay.com/blog/wp-content/uploads/2019/06/Payment-Processing-1-740x362.jpg"
   },
-  "currency":"usd",
-  
-  "backendURL": "https://btr-be.herokuapp.com",
-  "demoVideoID":"jaKF6yXm4II",
-  "testStore": {
-    "testStoreKey": "6082bd6e38a83e0015b1a943",
-    "testStoreToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDgyYmQ2ZTM4YTgzZTAwMTViMWE5NDMiLCJpYXQiOjE2MTkxODA5MTB9.a6i7lYZSKCO2iaApwXDdE1KB0ExTrWKQNxQ8qEa2wXM",
-    "testStorePassword": "12345678",
-    "testReceiptId": "6082bdb838a83e0015b1a944",
-    "testReceiptQrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAACkCAYAAAAZtYVBAAAAAklEQVR4AewaftIAAAYYSURBVO3BQY4kRxLAQDLQ//8yd45+SiBR1aNYyc3sD9a6xGGtixzWushhrYsc1rrIYa2LHNa6yGGtixzWushhrYsc1rrIYa2LHNa6yGGtixzWushhrYv88CGVv6niicobFZPKVPEJlU9UTCpTxROVv6niE4e1LnJY6yKHtS7yw5dVfJPKJyo+ofJGxZOKT1R8ouKbVL7psNZFDmtd5LDWRX74ZSpvVLyh8kTlmyomlTdUpopJZaqYVJ5UvKHyRsVvOqx1kcNaFzmsdZEf/uMqJpWp4knFpPKkYlKZKv7LDmtd5LDWRQ5rXeSH9UjlScVU8URlqphU3qj4NzmsdZHDWhc5rHWRH35Zxc1UvknlScWk8qTiicpU8UbFTQ5rXeSw1kUOa13khy9T+SdVTCpTxaQyVUwqU8WkMlVMKm9UTCpTxSdUbnZY6yKHtS5yWOsiP3yo4iYqv0llqnhS8YbKGxVPKv6fHNa6yGGtixzWusgPH1KZKiaVb6qYKiaVqeINlU+oTBVvVEwqT1Smiknlmyp+02GtixzWushhrYv88KGKSWWqeENlqphUpoqp4onKVPFEZap4UjGpfJPKVPGJiknlDZWp4hOHtS5yWOsih7Uu8sOHVKaKSeVJxVQxqUwVk8pU8U0Vk8pU8UbFpDKpTBVvqEwVT1SmikllUpkqvumw1kUOa13ksNZFfvjLKt6omFSeqPyXVUwqU8UTlTdUpopPHNa6yGGtixzWusgPX6byROVJxaQyVUwq/ySVT1S8ofKkYqr4RMXfdFjrIoe1LnJY6yL2Bx9QmSomlaniN6lMFZPKk4onKlPFGyrfVDGpvFExqXyi4hOHtS5yWOsih7Uu8sOHKiaVN1TeqJhUpoo3KiaVN1SmiicVk8qTiicqb1RMKp+o+KbDWhc5rHWRw1oX+eHLKiaVSeWNijdUnlR8U8UbKlPFpPJE5Z9U8ZsOa13ksNZFDmtd5IcPqTyp+ITKVPFGxScqJpVJ5UnFVPGkYlKZKiaVJxWTypOKN1Smik8c1rrIYa2LHNa6iP3BF6lMFZPKVPGGylQxqbxR8URlqphUpopJ5W+qmFSeVEwqTyomlaniE4e1LnJY6yKHtS5if/ABlScVb6g8qZhUnlQ8UZkqnqhMFU9UpopvUpkqnqg8qZhUnlR802GtixzWushhrYv88GUVb6hMFZ+omFQ+ofKJiknlZir/pMNaFzmsdZHDWhf54UMVk8pUMam8ofKkYlKZKiaVqeKbVJ5UTCpTxRsqv6liUvlNh7UucljrIoe1LmJ/8AGVNyomlScVk8pU8UTljYo3VJ5UTCpTxaTyRsWk8kbFJ1Smik8c1rrIYa2LHNa6yA9fVjGpTCpTxaQyqUwVT1SeVEwqT1TeqHhS8UbFE5Wp4onKE5U3Kr7psNZFDmtd5LDWRX74ZRWTypOKJypvVEwqT1TeqHiiMlV8QuUNlanim1Smik8c1rrIYa2LHNa6yA+/TOUNlTcqJpVJZaqYVJ5UTCqTyhsqTyomlaliUplUnqi8UfFE5ZsOa13ksNZFDmtdxP7g/5jKk4pJZar4hMpUMam8UfFE5UnFGypTxaQyVUwqU8UnDmtd5LDWRQ5rXeSHD6n8TRVTxaQyqXyTyhsVb6hMFZ9QmSo+oTJVfNNhrYsc1rrIYa2L/PBlFd+k8kTlScVvqnhD5W+qeEPlScWkMlV84rDWRQ5rXeSw1kV++GUqb1R8ouKJylTxCZUnFW9UTCpTxaQyqXxTxZOKbzqsdZHDWhc5rHWRH/7lVN5QmSqmiicqk8qTikllqvhExROVqWJSeaPiE4e1LnJY6yKHtS7yw7+MylQxqTypeKIyVTypeKLyhsobKk8q3qj4TYe1LnJY6yKHtS7ywy+r+E0VT1S+qeJJxaQyVUwVk8qk8qTiicpUManc5LDWRQ5rXeSw1kV++DKVv0nlScUTlaliUnlSMalMFW9UvKEyVUwVk8pUMalMFZPKVPFNh7UucljrIoe1LmJ/sNYlDmtd5LDWRQ5rXeSw1kUOa13ksNZFDmtd5LDWRQ5rXeSw1kUOa13ksNZFDmtd5LDWRQ5rXeR/aJLwZ+c2KFkAAAAASUVORK5CYII="
-  },
-  "home":{
-    "slider": {
-      "initialValue": 200,
-      "step":10,
-      "maxValue":5000
-    }
-  },
-  "descriptions":{
-    "topSellingAnalytics":"Choose how many top selling items you want to view.",
-    "incomeAnalytics":"It shows the total revenue of the sold items.",
-    "peakHoursAnalytics":"It shows number of orders per hour within a given date interval.",
-    "noReceiptsAnalytics":"Number of orders per hour within a given day.",
-    "savingAnalytics":"It shows the total savings for using digital receipts.",
-    "analyticsEdit": "Click the icon on the right to edit."
-  },
-  "references": {
-    "treesPerReceipt": "https://ribble-pack.co.uk/blog/much-paper-comes-one-tree#:~:text=How%20much%20paper%20comes%20from%20one%20tree%2C%20on%20average%3F,use%205%25%20of%20a%20tree.",
-    "greenAmericaURL": "https://www.greenamerica.org/sites/default/files/2019-06/Green%20America%27s%20Skip%20The%20Slip%20Report.pdf?_ga=2.106437251.1430328538.1600664203-1660819131.1600233513",
-    "receiptCost": "https://invoiz.world/as-revealed-by-world-resources-institute/#:~:text=According%20to%20Future%20Market%20Insights,just%20on%20the%20thermal%20paper%E2%80%9D.",
-    "co2PerReceipt":"https://www.eea.europa.eu/articles/forests-health-and-climate-change/key-facts/trees-help-tackle-climate-change#:~:text=Over%20one%20year%20a%20mature,of%20pollutants%20from%20the%20air."
-  }
+  "currency":"usd"
 }

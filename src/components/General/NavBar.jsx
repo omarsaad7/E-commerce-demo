@@ -4,7 +4,6 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle'
 import PersonAddAlt1RoundedIcon from '@mui/icons-material/PersonAddAlt1Rounded';
 import IconButton from '@material-ui/core/IconButton'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
-import DashboardIcon from '@material-ui/icons/Dashboard'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReactTooltip from 'react-tooltip'
 import { logout } from '../General/Functions'
