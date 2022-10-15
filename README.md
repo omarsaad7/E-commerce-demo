@@ -29,7 +29,7 @@ Deployment made using Vercel for frontend and Heroku for backend
 
 * [Back-end](https://e-commerce-demo-api.herokuapp.com/)
 
-Note: Heroku makes the app sleeps after a while of not using it. So backend deployment takes a little bit longer time for the first api call as it starts the application
+Note: Heroku free deployment used makes the app sleeps after a while of not using it. So backend deployment takes a little bit longer time for the first api call as it starts the application
 
 ## Run and test app on your local machine
 
@@ -41,7 +41,7 @@ You need to install git and npm on your machine.
 Clone the repo
 
 ```
-git clone https://github.com/AtosBeatTheReceipt/AtosBTR
+git clone https://github.com/omarsaad7/E-commerce-demo.git
 ```
 #### Run back-end server
 Get inside back-end folder
@@ -76,10 +76,6 @@ npm start
   Password : admin
 * Admin Apis has no frontend so you can test them from backend. All admin Apis are found in admin folder in the postman collection provided.
 * For successfull payment process please enter one of the valid testing card found in this [**Link**](https://stripe.com/docs/testing).
-
-### Note
-* The application is designed to be used in stores, integrated to the Point of Sales (POS) systems and run on PCs. While it also functions on mobile devices, it is recommended to view the screen in landscape mode.
-* The delete receipt and delete all receipts features in the dashboard are for testing only but when entering the market they will not appear as it is against the law to delete existing receipts for taxes calculations.
 
 
 ## Author
