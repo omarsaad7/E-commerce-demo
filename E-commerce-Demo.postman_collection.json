@@ -113,7 +113,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/api/users/customers/admin?page=1limit=2",
+							"raw": "{{host}}/api/users/customers/admin?page=1&limit=2",
 							"host": [
 								"{{host}}"
 							],
@@ -126,7 +126,11 @@
 							"query": [
 								{
 									"key": "page",
-									"value": "1limit=2"
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "2"
 								}
 							]
 						},
@@ -890,7 +894,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/api/users/customers/admin?page=1limit=2",
+							"raw": "{{host}}/api/users/customers/admin?page=1&limit=2",
 							"host": [
 								"{{host}}"
 							],
@@ -903,7 +907,11 @@
 							"query": [
 								{
 									"key": "page",
-									"value": "1limit=2"
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "2"
 								}
 							]
 						},
