@@ -1,7 +1,7 @@
 {
     "welcomeMsg": "Welcome to E-commerce App",
     "regex":{
-        "passwordRegex": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,50}$",
+        "passwordRegex": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^_&*-]).{8,50}$",
         "usernameRegex": "^[A-Za-z][A-Za-z0-9_]{7,29}$",
         "cardNumberRegex": "^[0-9]{16}$"
     },
@@ -14,7 +14,7 @@
         "invalidPassword": "INVALID PASSWORD",
         "noUserFound": "NO USER FOUND",
         "usernameValidation": "Username should be of length between 8 and 30, starts with letter and contain only letters, numbers and underscore",
-        "passwordValidation": "Password should be of length between 8 and 50, contain at least 1 lowercase letter, 1 uppercase letter, 1 number",
+        "passwordValidation": "Password should be of length between 8 and 50, contain at least 1 lowercase letter, 1 uppercase letter, 1 number and 1 special character",
         "cardNumberValidation":"Card number must have 16 digits",
         "userTypeCannotBeChanged": "USER TYPE CAN NOT BE CHANGED",
         "noTransactionFound":"NO TRANSACTION FOUND",
