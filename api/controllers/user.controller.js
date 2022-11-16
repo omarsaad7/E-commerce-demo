@@ -8,32 +8,32 @@ const {getUserId} = require('./auth.controller.js')
 
 
 //Create Customer
-const createCustomer = async (req, res) => {
+const createCustomer = async (data) => {
   //check if any attribute in the request body violates the attributes constraints
-  const { error } = createUserValidation(req.body)
-  if (error) return res.status(400).json({error:error.details[0].message})
+  const { error } = createUserValidation(data)
+  if (error) throw new Error(error.details[0].message)
+  //Check if username already exists
+  const user = await User.findOne({ username: data.username })
+  if (user)
+    throw new Error(constants.errorMessages.usernameAlreadyExists)
   //hash the store password
   const salt =  bcrypt.genSaltSync(10)
-  const hachedPassword =  bcrypt.hashSync(req.body.password, salt)
-  req.body.password = hachedPassword
+  const hachedPassword =  bcrypt.hashSync(data.password, salt)
+  data.password = hachedPassword
 
   //create new User with the given data and return the new user id and a token for the user 
-  await User.create(req.body)
+  return await User.create(data)
     .then(createdTarget => {
       const token = jwt.sign({ userId: createdTarget._id, userType:createdTarget.type}, process.env.TOKEN)
-      res.json({
-        msg: constants.errorMessages.success,
-        data:{
-          userId: createdTarget._id,
-          name:createdTarget.username,
-          token: token}
-      });
+      return {
+        userId: createdTarget._id,
+        name:createdTarget.username,
+        token: token
+      }
     },
     )
     .catch(error => {
-      res.status(422).json({
-        error: error.message
-      });
+      throw new Error(error.message)
     });
 
 };

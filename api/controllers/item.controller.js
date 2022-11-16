@@ -45,52 +45,47 @@ const createItem = async (req, res) => {
 
 
 //get item by id (No Auth required)
-const getItemById = (req, res) => {
+const getItemById = async (id) => {
   //search for the Item with the requested id
-  Item.findById(req.params.id)
+  return await Item.findById(id)
   .then(foundTarget => {
     // Throw Error if no item is found
     if(!foundTarget)
       throw new Error(constants.errorMessages.noItemFound);
-    res.json({
-      msg: constants.errorMessages.success,
-      data: foundTarget
-    });
+    return foundTarget
   })
   .catch(error => {
-    res.status(422).json({
-      error: error.message
-    });
+    throw error
   });
 };
 
 
 //get all items (No Auth required)
-const getAllItems =  (req, res) => {
-  
+const getAllItems = async (args) => {
+
       // make pagination in order not to load all items 
       // set default limit to 10 and start page to 1 
       // page and limit are changed to the values provided in the url
-      const { page = 1, limit = 10 } = req.query
+
+      if(!args.paginationInput)
+        args.paginationInput= {}
+      const { page = 1, limit = 10 } = args.paginationInput
       // sort the data with the latest come first and return the needed Items and the total number of Items
-      Item.find().sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
-        .then((items) => {
+      return await Item.find().sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+        .then(async (items) => {
           //Count All Items
-          Item.countDocuments().then((count)=>{
-            res.json({
-              msg:constants.errorMessages.success,
+          return await Item.countDocuments().then((count)=>{
+            return {
               totalSize: count,
               page:page,
               limit:limit,
-              data: items,
-            })
+              data: items
+            }
           })
           
         })
         .catch((error) => {
-          res.status(400).json({
-            error: error.message,
-          })
+          throw error
         })
     
 }

@@ -2,23 +2,22 @@ const User = require("../../models/user.model")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
 const constants = require('../../config/constants.json')
-Login = async (req, res) => {
+Login = async (data) => {
   try {
     //check the validity of the username
-    const user = await User.findOne({ username: req.body.username })
+    const user = await User.findOne({ username: data.username })
     if (!user)
-      return res.status(422).json({error:constants.errorMessages.invalidUsername})
+      throw new Error(constants.errorMessages.invalidUsername)
     //the password validety
     //we check if the given password matches the hashed store password 
-    const validPass = await bcrypt.compare(req.body.password, user.password)
+    const validPass = await bcrypt.compare(data.password, user.password)
     if (!validPass)
-      return res.status(422).json({error:constants.errorMessages.invalidPassword})
+      throw new Error(constants.errorMessages.invalidPassword)
     
     // Generate and return  token
     const token = jwt.sign({ userId: user._id, userType:user.type}, process.env.TOKEN)
-    res.header('Authorization', token).json({msg:constants.errorMessages.success,
-    data:{userId:user._id, token: token,userType: user.type}})
-  } catch (error) { res.status(400).json({ error: error.message }) }
+    return {userId:user._id, token: token,userType: user.type}
+  } catch (error) { throw error }
 }
 
 getUserId =  (token) =>  {
