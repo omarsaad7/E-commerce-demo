@@ -8,51 +8,50 @@ const {getUserId} = require('./auth.controller.js')
 const axios = require('axios')
 const {paymentBackendRequest,createTransactionDto} = require('../../utils/dto.utils.js')
 const { chargeValidation } = require('../../validations/transaction.validation')
+const HttpError = require('../../exceptions/HttpError')
 
 //Charge user
-const chargeUser = async (req, res) => {
+const pay = async (paymentInput,orderId,userId) => {
   
     try{
-      chargeValidation(req.body)
+      chargeValidation({payment:paymentInput,orderId:orderId})
     }
     catch(error) {
-          return res.status(400).json({
-            error: error.message
-          });
-        }
-
-    const userId = getUserId(req.headers.authorization)
+      throw new HttpError({msg:error.message,statusCode:constants.errorMessages.badRequest.statusCode})
+      }
     const user = await User.findById(userId)
     if(!user) 
-      return res.status(422).json({error: constants.errorMessages.noUserFound});
-    const order = await Order.findById(req.body.orderId)
+      throw new HttpError(constants.errorMessages.noUserFound)
+    const order = await Order.findById(orderId)
     if(!order) 
-      return res.status(422).json({error: constants.errorMessages.noOrderFound});
+      throw new HttpError(constants.errorMessages.noOrderFound)
     if(order.status !== constants.types.orderStatus.paymentProcessing)
-      return res.status(422).send({ error: constants.errorMessages.chargeForProcessingPaymentOrdersOnly }) 
+      throw new HttpError(constants.errorMessages.chargeForProcessingPaymentOrdersOnly)
 
-    // Accept request and Return 202
-    res.status(202).json({msg: constants.errorMessages.paymentRequestAccepted,data:order});
-
-    try{
-
-      var backendResponse = await chargeUserBackendCall(req.body.payment)
-      var transactionObject = createTransactionDto(backendResponse,req.body.orderId,userId)
-      const transaction = await Transaction.create(transactionObject)
-      await Order.updateOne({ '_id': req.body.orderId },{transactionId:transaction._id,status:constants.types.orderStatus.paid,receiptUrl: transaction.receipt_url})
-  }
-  catch(error){
-    var msg = error.message
-    if(error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-      msg = error.response.data.error.message
-    for (let i = 0; i < order.items.length; i++) {
-      var item = await Item.findById(order.items[i].item._id)
-      await Item.updateOne({ '_id': order.items[i].item._id }, {quantity: item.quantity + order.items[i].count})
-    }
-    await Order.updateOne({ '_id': req.body.orderId },{status:constants.types.orderStatus.paymentFailed,failureReason:msg})
-  }
+    chargeUser(paymentInput,order,orderId,userId)
+    return constants.errorMessages.paymentRequestAccepted.msg
 
 };
+
+const chargeUser = async (paymentInput,order,orderId,userId) => {
+    try{
+
+      var backendResponse = await chargeUserBackendCall(paymentInput)
+      var transactionObject = createTransactionDto(backendResponse,orderId,userId)
+      const transaction = await Transaction.create(transactionObject)
+      await Order.updateOne({ '_id': req.body.orderId },{transactionId:transaction._id,status:constants.types.orderStatus.paid,receiptUrl: transaction.receipt_url})
+    }
+    catch(error){
+      var msg = error.message
+      if(error.response && error.response.data && error.response.data.error && error.response.data.error.message)
+        msg = error.response.data.error.message
+      for (let i = 0; i < order.items.length; i++) {
+        var item = await Item.findById(order.items[i].item._id)
+        await Item.updateOne({ '_id': order.items[i].item._id }, {quantity: item.quantity + order.items[i].count})
+      }
+    await Order.updateOne({ '_id': orderId },{status:constants.types.orderStatus.paymentFailed,failureReason:msg})
+  }
+}
 
 const chargeUserBackendCall = async (body) => {
   const url = uri.transaction.backend.host + uri.transaction.backend.api.charge
@@ -76,104 +75,58 @@ const chargeUserBackendCall = async (body) => {
 
 
 //get Transaction by id
-const getTransactionById = (req, res) => {
+const getTransactionById = async (id) => {
   //search for the Transaction with the requested id
-  Transaction.findById(req.params.id)
+  return await Transaction.findById(id)
   .then(foundTarget => {
     // Throw Error if no transaction is found
     if(!foundTarget)
-      throw new Error(constants.errorMessages.noTransactionFound);
-    res.json({
-      msg: constants.errorMessages.success,
-      data: foundTarget
-    });
+      throw new HttpError(constants.errorMessages.noTransactionFound);
+
+    return foundTarget
   })
   .catch(error => {
-    res.status(422).json({
-      error: error.message
-    });
+    throw new HttpError({msg:error.message,statusCode:constants.errorMessages.badRequest.statusCode})
   });
 };
 
 
 
-//get all Transactions (Only Admins can access this api)
-getAllTransactions = async (req, res) => {
-
-    const userId = getUserId(req.headers.authorization)
-      const user = await User.findById(userId)
-      if(!user) 
-        return res.status(422).json({error: constants.errorMessages.noUserFound});
-      if(user.type !== constants.types.user.admin)
-        return res.status(403).json({
-          error: constants.errorMessages.forbidden
-        });
+//get all Transactions
+getAllTransactions = async (paginationInput,allUsersTransactions,userId) => {
         // make pagination in order not to load all transactions 
       // set default limit to 10 and start page to 1 
       // page and limit are changed to the values provided in the url
-      const { page = 1, limit = 10 } = req.query
+      if(!paginationInput)
+        paginationInput= {}
+      const { page = 1, limit = 10 } = paginationInput
       // sort the data with the latest come first and return the needed Items and the total number of Items
-      Transaction.find().sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
-        .then((transactions) => {
+      var query = {}
+      if(!allUsersTransactions)
+        query = {userId:userId}
+      return await Transaction.find(query).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+        .then(async (transactions) => {
           //Count All Transactions
-          Transaction.countDocuments().then((count)=>{
-            res.json({
-              msg:constants.errorMessages.success,
+          return await Transaction.countDocuments(query).then((count)=>{
+            return {
               totalSize: count,
               page:page,
               limit:limit,
-              data: transactions,
-            })
+              data: transactions
+            }
           })
-          
         })
         .catch((error) => {
-          res.status(400).json({
-            error: error.message,
-          })
+          throw new HttpError({msg:error.message,statusCode:constants.errorMessages.badRequest.statusCode})
         })
 }
 
 
-//get a User all his transactions
-getCustomerTransactions = async (req, res) => {
-      const userId = getUserId(req.headers.authorization)
-      const user = await User.findById(userId)
-      if(!user) 
-        return res.status(422).json({error: constants.errorMessages.noUserFound});
-
-        // make pagination in order not to load all orders 
-      // set default limit to 10 and start page to 1 
-      // page and limit are changed to the values provided in the url
-      const { page = 1, limit = 10 } = req.query
-      // sort the data with the latest come first and return the needed Items and the total number of Items
-      Transaction.find({userId:userId}).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
-        .then((transactions) => {
-          //Count All Transactions
-          Transaction.countDocuments({userId:userId}).then((count)=>{
-            res.json({
-              msg:constants.errorMessages.success,
-              totalSize: count,
-              page:page,
-              limit:limit,
-              data: transactions,
-            })
-          })
-          
-        })
-        .catch((error) => {
-          res.status(400).json({
-            error: error.message,
-          })
-        })
-};
-
 
 module.exports = {
-  chargeUser,
+  pay,
   getTransactionById,
-  getAllTransactions,
-  getCustomerTransactions
+  getAllTransactions
 };
 
 

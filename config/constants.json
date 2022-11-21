@@ -103,7 +103,7 @@
             "statusCode":200
         },
         "adminOnly": {
-            "msg":"Only Admins can access this API",
+            "msg":"Only Admins can access this Function",
             "statusCode":403
         },
         "errorOccured": {

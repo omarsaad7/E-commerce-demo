@@ -1,4 +1,3 @@
-const Item = require('../../models/item.model.js')
 const Controller = require("../../api/controllers/item.controller")
 const HttpError = require('../../exceptions/HttpError.js')
 const constants = require('../../config/constants.json')
