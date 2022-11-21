@@ -16,6 +16,7 @@ module.exports = {
 
         updateItemValidation : Item => {
             const itemSchema = Joi.object({
+                id:Joi.objectId().required(),
                 quantity:Joi.number().min(1).max(1.7976931348623157e+308),
                 name: Joi.string().min(1).max(30),
                 description: Joi.string().min(1).max(100),
@@ -24,6 +25,14 @@ module.exports = {
                 })
     
                 return itemSchema.validate(Item)
-            }
+            },
+
+            deleteItemValidation : id => {
+                const itemSchema = Joi.object({
+                    id:Joi.objectId().required()
+                    })
+        
+                    return itemSchema.validate({id:id})
+                }
 }
    

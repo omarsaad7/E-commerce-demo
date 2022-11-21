@@ -24,17 +24,29 @@ const itemInput = `input ItemInput {
     price: Int!
   }`
 
+const itemUpdateInput = `input ItemUpdateInput {
+  id:ID!
+  name: String
+  description: String
+  img: String
+  quantity: Int
+  price: Int
+}`
+
 const itemRootQuery = `
     items(paginationInput: PaginationInput):Items!
     item(id:ID!):Item!
 `
 
 const itemRootMutation = `
-    createItem(itemInput: ItemInput): Item
+    createItem(itemInput: ItemInput!): Item
+    updateItem(itemInput: ItemUpdateInput!): String
+    deleteItem(id: ID!): String
 `
 const itemSchemas =  `
 ${itemSchema}
 ${itemInput}
+${itemUpdateInput}
 ${allItemsSchema}
 `
 module.exports = {

@@ -1,46 +1,18 @@
 const User = require("../../models/user.model");
 const Item = require("../../models/item.model");
-const { updateItemValidation,createItemValidation } = require('../../validations/item.validation')
+const { updateItemValidation,createItemValidation,deleteItemValidation } = require('../../validations/item.validation')
 const constants = require('../../config/constants.json')
-const {getUserId} = require('./auth.controller.js')
 const HttpError = require('../../exceptions/HttpError')
 
 //Create Item (Only Admin)
-const createItem = async (req, res) => {
-  try {
-    // Get User and make sure that user type is admin
-    const userId = getUserId(req.headers.authorization)
-    User.findById(userId)
-      .then(user => {
-        // return If no user is found
-        if(!user)
-          return res.status(422).json({
-            error: constants.errorMessages.noUserFound
-          });
-          //Forbidden if user type is not an admin
-          if(user.type !== constants.types.user.admin)
-            return res.status(403).json({
-              error: constants.errorMessages.forbidden
-            });
+const createItem = async (body) => {
 
-          //check if any attribute in the request body violates the attributes constraints
-          const { error } = createItemValidation(req.body)
-          if (error) return res.status(400).json({error:error.details[0].message})
+    //check if any attribute in the request body violates the attributes constraints
+    const { error } = createItemValidation(body)
+    if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
 
-          //create new Item with the given data and return the new user id and a token for the user 
-           Item.create(req.body)
-            .then(createdTarget => {
-              return res.json({
-                msg: constants.errorMessages.success,
-                data: createdTarget
-              });
-            }
-            )
-      })
-  }
-  catch (error) { res.status(422).json({
-    error: error.message
-  }); }
+    //create new Item with the given data and return the new user id and a token for the user 
+      return await Item.create(body)
 };
 
 
@@ -66,7 +38,6 @@ const getAllItems = async (args) => {
       // make pagination in order not to load all items 
       // set default limit to 10 and start page to 1 
       // page and limit are changed to the values provided in the url
-
       if(!args.paginationInput)
         args.paginationInput= {}
       const { page = 1, limit = 10 } = args.paginationInput
@@ -91,71 +62,26 @@ const getAllItems = async (args) => {
 }
 
 //Update Item (Only Admin)
-const updateItem = async (req, res) => {
-  try {
-     // Get User and make sure that user type is admin
-     const userId = getUserId(req.headers.authorization)
-     User.findById(userId)
-       .then(async (user) => {
-         // return If no user is found
-         if(!user)
-           return res.status(422).json({
-             error: constants.errorMessages.noUserFound
-           });
-           //Forbidden if user type is not an admin
-           if(user.type !== constants.types.user.admin)
-             return res.status(403).json({
-               error: constants.errorMessages.forbidden
-             });
- 
-           //check if any attribute in the request body violates the attributes constraints
-           const { error } = updateItemValidation(req.body)
-           if (error) return res.status(400).json({error:error.details[0].message})
- 
-           const targetId = req.params.id;
-           const item = await Item.findById(targetId)
-           if (!item) return res.status(404).send({ error: constants.errorMessages.noItemFound })
-           await Item.updateOne({ '_id': targetId }, req.body)
-           res.json({ msg: constants.errorMessages.success});
-           
-       })
-  }
-  catch (error) {
-    res.status(422).json({
-      error: error.message
-    });
-  }
+const updateItem = async (body) => {
+  const { error } = updateItemValidation(body)
+  if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
+
+  const targetId = body.id;
+  body.id = null
+  const item = await Item.findById(targetId)
+  if (!item) throw new HttpError(constants.errorMessages.noItemFound)
+  await Item.updateOne({ '_id': targetId }, body)
+  return constants.errorMessages.success.msg
 }
 
 // Delete Item (Only Admin)
-const deleteItem = async (req, res) => {
-  try {
-    // Get User and make sure that user type is admin
-    const userId = getUserId(req.headers.authorization)
-    User.findById(userId)
-      .then(async (user) => {
-        // return If no user is found
-        if(!user)
-          return res.status(422).json({
-            error: constants.errorMessages.noUserFound
-          });
-          //Forbidden if user type is not an admin
-          if(user.type !== constants.types.user.admin)
-            return res.status(403).json({
-              error: constants.errorMessages.forbidden
-            });
+const deleteItem = async (id) => {
+  const { error } = deleteItemValidation(id)
+  if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
 
-          const id = req.params.id;
-          const deletedTarget = await Item.findByIdAndRemove(id)
-          if (!deletedTarget) return res.status(404).send({ error: constants.errorMessages.noItemFound })
-          res.json({ msg: constants.errorMessages.success });
-          })
-  }
-  catch (error) {
-    res.status(422).json({
-      error: error.message
-    });
-  }
+  const deletedTarget = await Item.findByIdAndRemove(id)
+  if (!deletedTarget) throw new HttpError(constants.errorMessages.noItemFound)
+  return constants.errorMessages.success.msg
 }
 
 

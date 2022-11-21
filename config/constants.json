@@ -10,6 +10,10 @@
             "msg":"SUCCESS",
             "statusCode":200
         },
+        "badRequest": {
+            "msg":"BAD REQUEST",
+            "statusCode":400
+        },
         "invalidUrl": {
             "msg":"INVALID URL",
             "statusCode":404
@@ -101,6 +105,10 @@
         "adminOnly": {
             "msg":"Only Admins can access this API",
             "statusCode":403
+        },
+        "errorOccured": {
+            "msg":"SOMETHING WENT WRONG",
+            "statusCode":500
         }
     },
     "types":{

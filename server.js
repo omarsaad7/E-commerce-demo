@@ -56,10 +56,10 @@ app.use('/graphql' , graphqlHTTP({
     if(!err.originalError) {
     return err;
     }
-    const data = err.originalError.data;
-    const message = err.message || 'An error occurred.';
-    const code = err.originalError.statusCode || 500;
-    return { message: message, status: code, data: data };
+    // const data = err.originalError.data;
+    const message = err.message || constants.errorMessages.errorOccured.msg;
+    const code = err.originalError.statusCode || constants.errorMessages.errorOccured.statusCode;
+    return { message: message, status: code };
     }
 }))
 // Wrong path

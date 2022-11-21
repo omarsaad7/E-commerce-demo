@@ -11,12 +11,12 @@ const HttpError = require('../../exceptions/HttpError')
 const createCustomer = async (data) => {
   //check if any attribute in the request body violates the attributes constraints
   const { error } = createUserValidation(data)
-  if (error) throw new Error(error.details[0].message)
+  if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
   //Check if username already exists
   const user = await User.findOne({ username: data.username })
   if (user)
-    throw new HttpError(constants.errorMessages.usernameAlreadyExists);
-    // throw new Error(constants.errorMessages.usernameAlreadyExists)
+    throw new HttpError(constants.errorMessages.usernameAlreadyExists)
+    
   //hash the store password
   const salt =  bcrypt.genSaltSync(10)
   const hachedPassword =  bcrypt.hashSync(data.password, salt)
