@@ -19,6 +19,7 @@ You can find a postman collection for all the backend apis used.
 * Node
 * Express
 * React
+* Stripe
 * Vercel
 * Heroku
 
