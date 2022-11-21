@@ -6,8 +6,8 @@ module.exports = {
     
     createUserValidation : User => {
         const userSchema = Joi.object({
-            username:Joi.string().pattern(new RegExp(Constants.regex.usernameRegex)).messages({'string.pattern.base': Constants.errorMessages.usernameValidation}).required(),
-            password: Joi.string().pattern(new RegExp(Constants.regex.passwordRegex)).messages({'string.pattern.base': Constants.errorMessages.passwordValidation}).required()
+            username:Joi.string().pattern(new RegExp(Constants.regex.usernameRegex)).messages({'string.pattern.base': Constants.errorMessages.usernameValidation.msg}).required(),
+            password: Joi.string().pattern(new RegExp(Constants.regex.passwordRegex)).messages({'string.pattern.base': Constants.errorMessages.passwordValidation.msg}).required()
             })
 
             return userSchema.validate(User)
@@ -15,8 +15,8 @@ module.exports = {
 
     updateUserValidation : User => {
         const userSchema = Joi.object({
-            username:Joi.string().pattern(new RegExp(Constants.regex.usernameRegex)).messages({'string.pattern.base': Constants.errorMessages.usernameValidation}),
-            password: Joi.string().pattern(new RegExp(Constants.regex.passwordRegex)).messages({'string.pattern.base': Constants.errorMessages.passwordValidation})
+            username:Joi.string().pattern(new RegExp(Constants.regex.usernameRegex)).messages({'string.pattern.base': Constants.errorMessages.usernameValidation.msg}),
+            password: Joi.string().pattern(new RegExp(Constants.regex.passwordRegex)).messages({'string.pattern.base': Constants.errorMessages.passwordValidation.msg})
             })
 
             return userSchema.validate(User)

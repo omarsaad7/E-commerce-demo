@@ -3,7 +3,7 @@ const Item = require("../../models/item.model");
 const { updateItemValidation,createItemValidation } = require('../../validations/item.validation')
 const constants = require('../../config/constants.json')
 const {getUserId} = require('./auth.controller.js')
-
+const HttpError = require('../../exceptions/HttpError')
 
 //Create Item (Only Admin)
 const createItem = async (req, res) => {
@@ -51,7 +51,7 @@ const getItemById = async (id) => {
   .then(foundTarget => {
     // Throw Error if no item is found
     if(!foundTarget)
-      throw new Error(constants.errorMessages.noItemFound);
+      throw new HttpError(constants.errorMessages.noItemFound);
     return foundTarget
   })
   .catch(error => {

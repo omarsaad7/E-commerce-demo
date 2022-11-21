@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs")
 const { createUserValidation,updateUserValidation,addItemValidation,removeItemValidation} = require('../../validations/user.validation')
 const constants = require('../../config/constants.json')
 const {getUserId} = require('./auth.controller.js')
-
+const HttpError = require('../../exceptions/HttpError')
 
 //Create Customer
 const createCustomer = async (data) => {
@@ -15,7 +15,8 @@ const createCustomer = async (data) => {
   //Check if username already exists
   const user = await User.findOne({ username: data.username })
   if (user)
-    throw new Error(constants.errorMessages.usernameAlreadyExists)
+    throw new HttpError(constants.errorMessages.usernameAlreadyExists);
+    // throw new Error(constants.errorMessages.usernameAlreadyExists)
   //hash the store password
   const salt =  bcrypt.genSaltSync(10)
   const hachedPassword =  bcrypt.hashSync(data.password, salt)

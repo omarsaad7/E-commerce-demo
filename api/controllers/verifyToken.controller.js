@@ -8,7 +8,6 @@ module.exports = async function (req, res, next) {
     req.isAdmin = false
     if (!token){
         req.isAuth = false
-        // return res.status(401).send({error:constants.errorMessages.unauthorized})
     }
     try {
         token = token.replace('Bearer ','')
@@ -20,7 +19,6 @@ module.exports = async function (req, res, next) {
     }
     catch (error) {
         req.isAuth = false
-        // res.status(403).send({error:constants.errorMessages.forbidden})
     }
     next()
 

@@ -39,7 +39,7 @@ app.use(cors());
 app.use(verifyToken);
 
 // Entry point
-app.get("/", (req, res) => res.send({msg:constants.welcomeMsg}));
+app.get("/", (req, res) => res.send({msg:constants.welcomeMsg.msg}));
 // Use Routes
 app.use(uri.user.baseUri, require("./api/routes/user.router"));
 app.use(uri.transaction.baseUri, require("./api/routes/transaction.router"));
@@ -58,13 +58,13 @@ app.use('/graphql' , graphqlHTTP({
     }
     const data = err.originalError.data;
     const message = err.message || 'An error occurred.';
-    const code = err.originalError.code || 500;
+    const code = err.originalError.statusCode || 500;
     return { message: message, status: code, data: data };
     }
 }))
 // Wrong path
 app.use((req, res) =>
-  res.status(404).send({error:constants.errorMessages.invalidUrl})
+  res.status(constants.errorMessages.invalidUrl.statusCode).send({error:constants.errorMessages.invalidUrl.msg})
 );
 
 

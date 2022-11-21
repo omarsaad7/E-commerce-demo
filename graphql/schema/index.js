@@ -16,12 +16,14 @@ const rootQuery = `type RootQuery {
 const rootMutation = `type RootMutation {
     ${authRootMutation}
     ${itemRootMutation}
+    ${userRootMutation}
 }`
 
 module.exports = buildSchema(`
 
 ${authSchemas}
 ${itemSchemas}
+${userSchemas}
 ${paginationInput}
 ${rootQuery}
 ${rootMutation}

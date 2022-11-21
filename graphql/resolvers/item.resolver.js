@@ -10,7 +10,6 @@ const {
 
 module.exports = {
     items: async (args) => {
-      console.log(args)
       return await getAllItems(args)
     },
     item: async (args) => {
