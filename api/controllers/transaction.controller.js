@@ -93,7 +93,7 @@ const getTransactionById = async (id) => {
 
 
 //get all Transactions
-getAllTransactions = async (paginationInput,allUsersTransactions,userId) => {
+getAllTransactions = async (paginationInput,allUsers,userId) => {
         // make pagination in order not to load all transactions 
       // set default limit to 10 and start page to 1 
       // page and limit are changed to the values provided in the url
@@ -102,7 +102,7 @@ getAllTransactions = async (paginationInput,allUsersTransactions,userId) => {
       const { page = 1, limit = 10 } = paginationInput
       // sort the data with the latest come first and return the needed Items and the total number of Items
       var query = {}
-      if(!allUsersTransactions)
+      if(!allUsers)
         query = {userId:userId}
       return await Transaction.find(query).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
         .then(async (transactions) => {

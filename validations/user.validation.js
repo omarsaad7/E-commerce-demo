@@ -24,18 +24,18 @@ module.exports = {
 
     addItemValidation : item => {
         const itemIdSchema = Joi.object({
-            itemId:Joi.objectId().required(),
+            item:Joi.objectId().required(),
             count:Joi.number().min(1).required(),
             })
 
             return itemIdSchema.validate(item)
     },
-    removeItemValidation : item => {
+    removeItemValidation : itemId => {
         const itemIdSchema = Joi.object({
             itemId:Joi.objectId().required(),
             })
 
-            return itemIdSchema.validate(item)
+            return itemIdSchema.validate({itemId:itemId})
     }
 }
    

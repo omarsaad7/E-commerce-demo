@@ -41,207 +41,130 @@ const createCustomer = async (data) => {
 
 
 //get Customer by id
-const getUserById = (req, res) => {
+const getUserById = async (id) => {
   //search for the User with the requested id
-  User.findById(req.params.id)
+  return await User.findById(id).populate('cart.item')
   .then(foundTarget => {
     // Throw Error if no user is found
     if(!foundTarget)
-      throw new Error(constants.errorMessages.noUserFound);
-    res.json({
-      msg: constants.errorMessages.success,
-      data: foundTarget
-    });
+      throw new HttpError(constants.errorMessages.noUserFound);
+    return foundTarget
   })
-  .catch(error => {
-    res.status(422).json({
-      error: error.message
-    });
-  });
 };
 
 
 //get all users (Only Admins can access this api)
-const getAllCustomers = async (req, res) => {
-  try {
-    // Get User and make sure that user type is admin
-    const userId = getUserId(req.headers.authorization)
-    const user = await User.findById(userId)
-    // return If no user is found
-    if(!user)
-      return res.status(422).json({
-        error: constants.errorMessages.noUserFound
-      });
-    //Forbidden if user type is not an admin
-    if(user.type !== constants.types.user.admin)
-      return res.status(403).json({
-        error: constants.errorMessages.forbidden
-      });
+const getAllCustomers = async (paginationInput) => {
 
         // make pagination in order not to load all customers 
       // set default limit to 10 and start page to 1 
       // page and limit are changed to the values provided in the url
-      const { page = 1, limit = 10 } = req.query
+      if(!paginationInput)
+        paginationInput= {}
+      const { page = 1, limit = 10} = paginationInput
       // sort the data with the latest come first and return the needed Items and the total number of Items
-      User.find({type:constants.types.user.customer}).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
-        .then((users) => {
+      return await User.find({type:constants.types.user.customer}).populate('cart.item').sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+        .then(async (users) => {
           //Count All Transactions
-          User.countDocuments({type:constants.types.user.customer}).then((count)=>{
-            res.json({
-              msg:constants.errorMessages.success,
+          return await User.countDocuments({type:constants.types.user.customer}).then((count)=>{
+            return {
               totalSize: count,
               page:page,
               limit:limit,
-              data: users,
-            })
-          })
-          
+              data: users
+            }
+          })   
         })
-        .catch((error) => {
-          res.status(400).json({
-            error: error.message,
-          })
-        })
-
-  }
-  catch (error) { res.status(422).json({
-    error: error.message
-  }); }
 };
 
 
-const updateUser = async (req, res) => {
-  try {
-    //make sure that type is not required to be changed
-    if(req.body.type)
-      return res.status(400).json({
-        error: constants.errorMessages.userTypeCannotBeChanged
-      });
-    
+const updateUser = async (data,targetId) => {
+
     // Validate request body
-    const { error } = updateUserValidation(req.body)
-    if (error) return res.status(400).json({error:error.details[0].message})
+    const { error } = updateUserValidation(data)
+    if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
 
     //find the user given it's id in the request url then update its data with the data provided in the request body
-    const targetId = req.params.id;
-    if(req.body.password){
+    if(data.username){
+      const userFound = await User.findOne({username:data.username})
+      console.log(userFound)
+      if(userFound)
+        throw new HttpError(constants.errorMessages.usernameAlreadyExists);
+    }
+    
+    if(data.password){
       //hash the store password
       const salt =  bcrypt.genSaltSync(10)
-      const hachedPassword =  bcrypt.hashSync(req.body.password, salt)
-      req.body.password = hachedPassword
+      const hachedPassword =  bcrypt.hashSync(data.password, salt)
+      data.password = hachedPassword
     }
     const user = await User.findById(targetId)
-    if (!user) return res.status(404).send({ error: constants.errorMessages.noUserFound })
-    await User.updateOne({ '_id': targetId }, req.body)
-    res.json({ msg: constants.errorMessages.success});
-  }
-  catch (error) {
-    res.status(422).json({
-      error: error.message
-    });
-  }
+    if (!user) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
+    await User.updateOne({ '_id': targetId }, data)
+    return constants.errorMessages.success.msg
 }
 
-const deleteUser = async (req, res) => {
-  try {
-
-    const id = req.params.id;
+const deleteUser = async (id) => {
     const deletedTarget = await User.findByIdAndRemove(id)
-    if (!deletedTarget) return res.status(404).send({ error: constants.errorMessages.noUserFound })
-    res.json({ msg: constants.errorMessages.success });
-  }
-  catch (error) {
-    res.status(422).json({
-      error: error.message
-    });
-  }
+    if (!deletedTarget) throw new HttpError(constants.errorMessages.noUserFound)
+    return constants.errorMessages.success.msg
 }
 
 //add Item to cart
-const addItem =  (req, res) => {
-  try {
+const addItem =  async (data,userId) => {
     // Validate Request Body
-    const { error } = addItemValidation(req.body)
-    if (error) return res.status(400).json({error:error.details[0].message})
+    const { error } = addItemValidation(data)
+    if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
     // Get User 
-    const userId = getUserId(req.headers.authorization)
-    User.findById(userId)
-      .then(user => {
+    return await User.findById(userId)
+      .then(async (user) => {
         // return If no user is found
         if(!user)
-          return res.status(404).json({
-            error: constants.errorMessages.noUserFound
-          });
+          throw new HttpError(constants.errorMessages.noUserFound)
 
           // Get Item
-          Item.findById(req.body.itemId)
+          return await Item.findById(data.item)
           .then(async (item) => {
             if(!item)
-            return res.status(404).json({
-              error: constants.errorMessages.noItemFound
-            });
+              throw new HttpError(constants.errorMessages.noItemFound)
             for (let i = 0; i <  user.cart.length; i++) {
               if(user.cart[i].item._id.toString()===item._id.toString()){
-                user.cart[i].count = user.cart[i].count + req.body.count
+                user.cart[i].count = user.cart[i].count + data.count
                 await User.updateOne({ '_id': userId }, {cart:user.cart})
-                return res.json({ msg: constants.errorMessages.success});
+                return constants.errorMessages.success.msg
               }
             }
-            user.cart.push({item:item,count:req.body.count})
+            user.cart.push({item:item._id,count:data.count})
             await User.updateOne({ '_id': userId }, {cart:user.cart})
-            res.json({ msg: constants.errorMessages.success});
+            return constants.errorMessages.success.msg
           })
            
       })
-  }
-  catch (error) { res.status(422).json({
-    error: error.message
-  }); }
 };
 
 
 
-//add Item to cart
-const removeItem =  (req, res) => {
-  try {
+//remove Item from cart
+const removeItem = async (itemId,userId) => {
     // Validate Request Body
-    const { error } = removeItemValidation(req.body)
-    if (error) return res.status(400).json({error:error.details[0].message})
-    // Get User 
-    const userId = getUserId(req.headers.authorization)
-    User.findById(userId)
-      .then(user => {
+    const { error } = removeItemValidation(itemId)
+    if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
+    // Get User
+    return await User.findById(userId)
+      .then(async (user) => {
         // return If no user is found
         if(!user)
-          return res.status(404).json({
-            error: constants.errorMessages.noUserFound
-          });
-
-          // Get Item
-          Item.findById(req.body.itemId)
-          .then(async (item) => {
-            if(!item)
-            return res.status(404).json({
-              error: constants.errorMessages.noItemFound
-            });
-            for (let i = 0; i <  user.cart.length; i++) {
-              if(user.cart[i].item._id.toString()===item._id.toString()){
-               
-                user.cart.splice(i, 1)
-                await User.updateOne({ '_id': userId }, {cart:user.cart})
-                return res.json({ msg: constants.errorMessages.success});
-              }
+          throw new HttpError(constants.errorMessages.noUserFound)
+          for (let i = 0; i <  user.cart.length; i++) {
+            if(user.cart[i].item._id.toString()===itemId.toString()){
+              user.cart.splice(i, 1)
+              await User.updateOne({ '_id': userId }, {cart:user.cart})
+              return constants.errorMessages.success.msg
             }
-            res.status(422).json({
-              error: constants.errorMessages.itemNotInCart
-            })
-          })
-           
+          }
+          throw new HttpError(constants.errorMessages.itemNotInCart)   
       })
-  }
-  catch (error) { res.status(422).json({
-    error: error.message
-  }); }
+ 
 };
 
 module.exports = {

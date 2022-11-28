@@ -23,12 +23,12 @@ module.exports = {
                 return orderSchema.validate(Order)
             },
 
-        OrderIdValidation : Order => {
+        OrderIdValidation : orderId => {
             const orderSchema = Joi.object({
                 orderId:Joi.objectId().required()
                 })
                 
-                return orderSchema.validate(Order)
+                return orderSchema.validate({orderId:orderId})
             }
 }
    

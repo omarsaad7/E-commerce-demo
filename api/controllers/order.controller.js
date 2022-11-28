@@ -4,50 +4,39 @@ const Order = require("../../models/order.model")
 const { createOrderValidation,filterOrderValidation, OrderIdValidation } = require('../../validations/order.validation')
 const constants = require('../../config/constants.json')
 const {getUserId} = require('./auth.controller.js')
-const {chargeUser} = require('./transaction.controller.js')
 const HttpError = require('../../exceptions/HttpError')
 //Create Order
-const createOrder = async (req, res) => {
-  try {
+const createOrder = async (userId) => {
 
-    // Get User
-    const userId = getUserId(req.headers.authorization)
-    const user = await User.findById(userId)
-        // return If no user is found
+    const user = await User.findById(userId).populate('cart')
+    console.log(user)
+    // return If no user is found
     if(!user)
-      return res.status(422).json({
-        error: constants.errorMessages.noUserFound
-      });
+      throw new HttpError(constants.errorMessages.noUserFound)
     //return error if user cart is empty
     if(user.cart.length === 0)
-      return res.status(422).json({error: constants.errorMessages.emptyCart});
+      throw new HttpError(constants.errorMessages.emptyCart)
           
     // check for items availablity, update Them and calculate total price
     var {totalPrice,errorMsg} =  await getTotalPriceAndUpdateItems(user)
-    if(errorMsg)  return res.status(422).json({error: errorMsg});
+    if(errorMsg)  throw new HttpError({msg:errorMsg,statusCode:constants.errorMessages.itemNotAvailable.statusCode})
 
     const createOrderData = {userId:userId, totalPrice:totalPrice,payment:req.body.payment,items:user.cart}    
     const order = await Order.create(createOrderData)
     await User.updateOne({ '_id': userId }, {cart:[]})
-    res.json({msg:constants.errorMessages.success,data:order})  
-
-  }
-  catch (error) { 
-    res.status(422).json({
-    error: error.message
-  }); }
+    return order
 };
 
-const processToPaymentOrder = async (req, res) => {
+const processToPaymentOrder = async (orderId) => {
 
-  const { error } = OrderIdValidation(req.body)
-  if (error) return res.status(400).json({error:error.details[0].message})
-  const order = await Order.findById(req.body.orderId)
-  if (!order) return res.status(404).send({ error: constants.errorMessages.noOrderFound })
+  const { error } = OrderIdValidation(orderId)
+  if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
+  const order = await Order.findById(orderId)
+  if (!order) throw new HttpError(constants.errorMessages.noOrderFound)
   if(order.status !== constants.types.orderStatus.pending)
-            return res.status(422).send({ error: constants.errorMessages.payForPendingOrdersOnly })
-  await Order.updateOne({ '_id': req.body.orderId }, {status:constants.types.orderStatus.paymentProcessing})
-  res.json({ msg: constants.errorMessages.success});
+      throw new HttpError(constants.errorMessages.payForPendingOrdersOnly)
+  await Order.updateOne({ '_id': orderId }, {status:constants.types.orderStatus.paymentProcessing})
+  return constants.errorMessages.success.msg
 }
 
 
@@ -72,145 +61,75 @@ const getTotalPriceAndUpdateItems = async (user) => {
 }
 
 //get Order by id
-const getOrderById = (req, res) => {
+const getOrderById = async (orderId) => {
   //search for the Order with the requested id
-  Order.findById(req.params.id)
+  return await Order.findById(orderId)
   .then(foundTarget => {
-    // Throw Error if no user is found
+    // Throw Error if no order is found
     if(!foundTarget)
-      throw new Error(constants.errorMessages.noOrderFound);
-    res.json({
-      msg: constants.errorMessages.success,
-      data: foundTarget
-    });
+      throw new HttpError(constants.errorMessages.noOrderFound);
+    return foundTarget
   })
   .catch(error => {
-    res.status(422).json({
-      error: error.message
-    });
+    throw error
   });
 };
 
 
-//get all customer orders
-const getAllCustomerOrders = async (req, res) => {
+//get all orders
+const getAllOrders = async (paginationInput,status,allUsers,userId) => {
 
-      const userId = getUserId(req.headers.authorization)
-      const user = await User.findById(userId)
-      if(!user) 
-        return res.status(422).json({error: constants.errorMessages.noUserFound});
-
-        // make pagination in order not to load all orders 
-      // set default limit to 10 and start page to 1 
-      // page and limit are changed to the values provided in the url
-      const { page = 1, limit = 10, status } = req.query 
-      findQuery = {userId:userId}
-      if(status){
-        const { error } = filterOrderValidation({status:req.query.status})
-        if (error) return res.status(400).json({error:error.details[0].message})
-        findQuery.status = req.query.status.toUpperCase()
-      }
-      // sort the data with the latest come first and return the needed Items and the total number of Items
-      Order.find(findQuery).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
-        .then((orders) => {
-          //Count All Orders
-          Order.countDocuments(findQuery).then((count)=>{
-            res.json({
-              msg:constants.errorMessages.success,
-              totalSize: count,
-              page:page,
-              limit:limit,
-              data: orders,
-            })
-          })
-          
-        })
-        .catch((error) => {
-          res.status(400).json({
-            error: error.message,
-          })
-        })
-    
-}
-
-
-
-//get all orders(Only Admin)
-const getAllOrders = async (req, res) => {
-
-  const userId = getUserId(req.headers.authorization)
-  const user = await User.findById(userId)
-  if(!user) 
-    return res.status(422).json({error: constants.errorMessages.noUserFound});
-  if(user.type !== constants.types.user.admin)
-    return res.status(403).json({
-      error: constants.errorMessages.forbidden
-    });
     // make pagination in order not to load all orders 
   // set default limit to 10 and start page to 1 
   // page and limit are changed to the values provided in the url
-  const { page = 1, limit = 10, status } = req.query 
+  if(!paginationInput)
+    paginationInput= {}
+  const { page = 1, limit = 10} = paginationInput
   findQuery = {}
   if(status){
-    const { error } = filterOrderValidation({status:req.query.status})
-    if (error) return res.status(400).json({error:error.details[0].message})
-    findQuery.status = req.query.status.toUpperCase()
+    const { error } = filterOrderValidation({status:status})
+    if (error) throw new HttpError({msg:error.details[0].message,statusCode:constants.errorMessages.badRequest.statusCode})
+    findQuery.status = status.toUpperCase()
   }
+  if(!allUsers)
+    findQuery.userId = userId
   // sort the data with the latest come first and return the needed Items and the total number of Items
-  Order.find(findQuery).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
-    .then((orders) => {
+  return await Order.find(findQuery).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+    .then(async (orders) => {
       //Count All Orders
-      Order.countDocuments(findQuery).then((count)=>{
-        res.json({
-          msg:constants.errorMessages.success,
+      return await Order.countDocuments(findQuery).then((count)=>{
+        return {
           totalSize: count,
           page:page,
           limit:limit,
-          data: orders,
-        })
+          data: orders
+        }
       })
       
     })
-    .catch((error) => {
-      res.status(400).json({
-        error: error.message,
-      })
-    })
-
 }
 
 // Delete Order
-const deleteOrder = async (req, res) => {
-  try {
+const deleteOrder = async (id) => {
 
-
-          const id = req.params.id;
-          const order = await Order.findById(id)
-          if (!order) return res.status(404).send({ error: constants.errorMessages.noOrderFound })
-          if(order.status !== constants.types.orderStatus.pending)
-            return res.status(422).send({ error: constants.errorMessages.deletePendingOrderOnly })
-          
-            for (let i = 0; i < order.items.length; i++) {
-              var item = await Item.findById(order.items[i].item._id)
-              await Item.updateOne({ '_id': order.items[i].item._id }, {quantity: item.quantity + order.items[i].count})
-            }
-          await Order.deleteOne({"_id":id})
-          res.json({ msg: constants.errorMessages.success });
-  }
-  catch (error) {
-    res.status(422).json({
-      error: error.message
-    });
-  }
+    const order = await Order.findById(id)
+    if (!order) throw new HttpError(constants.errorMessages.noOrderFound)
+    if(order.status !== constants.types.orderStatus.pending)
+      throw new HttpError(constants.errorMessages.deletePendingOrderOnly)
+    
+      for (let i = 0; i < order.items.length; i++) {
+        var item = await Item.findById(order.items[i].item._id)
+        await Item.updateOne({ '_id': order.items[i].item._id }, {quantity: item.quantity + order.items[i].count})
+      }
+    await Order.deleteOne({"_id":id})
+    return constants.errorMessages.success.msg
 }
 
 
 module.exports = {
   createOrder,
   getOrderById,
-  getAllCustomerOrders,
   getAllOrders,
-  processToPaymentOrder,
   deleteOrder,
   processToPaymentOrder
 };

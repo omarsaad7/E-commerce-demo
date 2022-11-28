@@ -27,7 +27,7 @@ const orderSchema = new Schema(
       required : true
     },
     totalPrice: { type : Number , required : true},
-    items:[{item:Item.schema,count:Number}],
+    items:[{item:{type: Schema.Types.ObjectId, ref: 'Item'},count:Number}],
     payment: payment,
     status:{
       type: String,

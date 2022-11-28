@@ -12,9 +12,9 @@ module.exports = {
     transactions: async (args,req) => {
       if(!req.isAuth)
         throw new HttpError(constants.errorMessages.unauthorized)
-      if(args.allUsersTransactions && !req.isAdmin)
+      if(args.allUsers && !req.isAdmin)
         throw new HttpError(constants.errorMessages.adminOnly)
-      return await getAllTransactions(args.paginationInput,args.allUsersTransactions,req.user.userId)
+      return await getAllTransactions(args.paginationInput,args.allUsers,req.user.userId)
     },
     transaction: async (args,req) => {
       if(!req.isAuth)

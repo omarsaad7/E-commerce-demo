@@ -12,7 +12,7 @@ const user = new Schema(
       enum : [constants.types.user.customer,constants.types.user.admin],
       default: constants.types.user.customer
   },
-    cart:[{item:Item.schema,count:Number}]
+    cart:[{item:{type: Schema.Types.ObjectId,ref: "Item"},count:Number}]
   },
   {
     timestamps: true

@@ -68,7 +68,7 @@ const paymentInput = `input PaymentInput {
 }`
 
 const transactionRootQuery = `
-    transactions(paginationInput: PaginationInput,allUsersTransactions:Boolean):Transactions
+    transactions(paginationInput: PaginationInput,allUsers:Boolean):Transactions
     transaction(id:ID!):Transaction!
 `
 
