@@ -1,15 +1,14 @@
 const User = require("../../models/user.model")
 const Item = require("../../models/item.model")
 const Order = require("../../models/order.model")
-const { createOrderValidation,filterOrderValidation, OrderIdValidation } = require('../../validations/order.validation')
+const { filterOrderValidation, OrderIdValidation } = require('../../validations/order.validation')
 const constants = require('../../config/constants.json')
 const {getUserId} = require('./auth.controller.js')
 const HttpError = require('../../exceptions/HttpError')
 //Create Order
 const createOrder = async (userId) => {
 
-    const user = await User.findById(userId).populate('cart')
-    console.log(user)
+    const user = await User.findById(userId).populate('cart.item')
     // return If no user is found
     if(!user)
       throw new HttpError(constants.errorMessages.noUserFound)
@@ -21,7 +20,8 @@ const createOrder = async (userId) => {
     var {totalPrice,errorMsg} =  await getTotalPriceAndUpdateItems(user)
     if(errorMsg)  throw new HttpError({msg:errorMsg,statusCode:constants.errorMessages.itemNotAvailable.statusCode})
 
-    const createOrderData = {userId:userId, totalPrice:totalPrice,payment:req.body.payment,items:user.cart}    
+    const createOrderData = {userId:userId, totalPrice:totalPrice,items:user.cart}    
+  
     const order = await Order.create(createOrderData)
     await User.updateOne({ '_id': userId }, {cart:[]})
     return order
@@ -45,11 +45,12 @@ const getTotalPriceAndUpdateItems = async (user) => {
   var totalPrice = 0
   var itemsList = []
   for (let i = 0; i < user.cart.length; i++) {
-    var item = await Item.findById(user.cart[i].item._id)
+    var item = user.cart[i].item
     if(item.quantity < user.cart[i].count){
       return {errorMsg:item.name + constants.errorMessages.itemNotAvailable}
     }
     itemsList.push({item:item,count: user.cart[i].count})
+    user.cart[i].item = user.cart[i].item._id 
   }
 
   // update items quantity and calculate total price
@@ -63,7 +64,7 @@ const getTotalPriceAndUpdateItems = async (user) => {
 //get Order by id
 const getOrderById = async (orderId) => {
   //search for the Order with the requested id
-  return await Order.findById(orderId)
+  return await Order.findById(orderId).populate('items.item')
   .then(foundTarget => {
     // Throw Error if no order is found
     if(!foundTarget)
@@ -94,7 +95,7 @@ const getAllOrders = async (paginationInput,status,allUsers,userId) => {
   if(!allUsers)
     findQuery.userId = userId
   // sort the data with the latest come first and return the needed Items and the total number of Items
-  return await Order.find(findQuery).sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
+  return await Order.find(findQuery).populate('items.item').sort({ createdAt: -1 }).limit(limit * 1).skip((page - 1) * limit < 0 ? 0 : (page - 1) * limit)
     .then(async (orders) => {
       //Count All Orders
       return await Order.countDocuments(findQuery).then((count)=>{
@@ -112,13 +113,13 @@ const getAllOrders = async (paginationInput,status,allUsers,userId) => {
 // Delete Order
 const deleteOrder = async (id) => {
 
-    const order = await Order.findById(id)
+    const order = await Order.findById(id).populate('items.item')
     if (!order) throw new HttpError(constants.errorMessages.noOrderFound)
     if(order.status !== constants.types.orderStatus.pending)
       throw new HttpError(constants.errorMessages.deletePendingOrderOnly)
     
       for (let i = 0; i < order.items.length; i++) {
-        var item = await Item.findById(order.items[i].item._id)
+        var item = order.items[i].item
         await Item.updateOne({ '_id': order.items[i].item._id }, {quantity: item.quantity + order.items[i].count})
       }
     await Order.deleteOne({"_id":id})

@@ -15,6 +15,15 @@ const orderSchema = `type Order {
     updatedAt:String
   }`
 
+  const createOrderSchema = `type CreatedOrder {
+    _id: ID
+    status: String
+    totalPrice: Int
+    userId:ID
+    createdAt:String
+    updatedAt:String
+  }`
+
 const allOrdersSchema = `type Orders {
     totalSize: Int
     limit: Int
@@ -29,7 +38,7 @@ const orderRootQuery = `
 `
 
 const orderRootMutation = `
-    createOrder: Order
+    createOrder: CreatedOrder
     processToPaymentOrder(orderId:ID!): String
     deleteOrder(id:ID!): String
 `
@@ -37,6 +46,7 @@ const orderSchemas =  `
 ${orderItemSchema}
 ${orderSchema}
 ${allOrdersSchema}
+${createOrderSchema}
 `
 module.exports = {
   orderSchemas,
